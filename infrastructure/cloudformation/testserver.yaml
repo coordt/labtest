@@ -1,0 +1,563 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Test Server Infrastructure
+Parameters:
+  ParentVPCStack:
+    Description: 'Stack name of parent VPC stack based on vpc/vpc-*azs.yaml template.'
+    Type: String
+    Default: 'TestVPC'
+  ParentSSHBastionStack:
+    Description: 'Optional but recommended stack name of parent SSH bastion host/instance stack based on vpc/vpc-ssh-bastion.yaml template.'
+    Type: String
+    Default: 'TestSSHBastion'
+  KeyName:
+    Description: 'Optional key pair of the ec2-user to establish a SSH connection to the EC2 instance.'
+    Type: String
+    Default: ''
+  IAMUserSSHAccess:
+    Description: 'Synchronize public keys of IAM users to enable personalized SSH access (Doc: https://cloudonaut.io/manage-aws-ec2-ssh-access-with-iam/).'
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  SystemsManagerAccess:
+    Description: 'Enable AWS Systems Manager agent and authorization.'
+    Type: String
+    Default: true
+    AllowedValues:
+    - true
+    - false
+  InstanceType:
+    Description: The instance type for the EC2 instance.
+    Type: String
+    Default: t2.medium
+  Name:
+    Description: 'The name for the EC2 instance.'
+    Type: String
+    Default: 'test'
+  PrivateIPAddress:
+    Description: 'The private IP address to use.'
+    Type: String
+    Default: '10.20.10.41'
+Mappings:
+  RegionMap:
+    ap-south-1:
+      AMI: ami-3b2f7954
+    eu-west-3:
+      AMI: ami-5ce55321
+    eu-west-2:
+      AMI: ami-6d263d09
+    eu-west-1:
+      AMI: ami-db1688a2
+    ap-northeast-2:
+      AMI: ami-3e04a450
+    ap-northeast-1:
+      AMI: ami-c2680fa4
+    sa-east-1:
+      AMI: ami-f1337e9d
+    ca-central-1:
+      AMI: ami-7549cc11
+    ap-southeast-1:
+      AMI: ami-4f89f533
+    ap-southeast-2:
+      AMI: ami-38708c5a
+    eu-central-1:
+      AMI: ami-1b2bb774
+    us-east-1:
+      AMI: ami-428aa838
+    us-east-2:
+      AMI: ami-710e2414
+    us-west-1:
+      AMI: ami-4a787a2a
+    us-west-2:
+      AMI: ami-7f43f307
+Conditions:
+  HasPrivateIP: !Not [!Equals [Ref: PrivateIPAddress, '']]
+  HasKeyName: !Not [!Equals [Ref: KeyName, '']]
+  HasIAMUserSSHAccess: !Equals [!Ref IAMUserSSHAccess, 'true']
+  HasSystemsManagerAccess: !Equals [!Ref SystemsManagerAccess, 'true']
+  HasSSHBastionSecurityGroup: !Not [!Equals [!Ref ParentSSHBastionStack, '']]
+  HasNotSSHBastionSecurityGroup: !Equals [!Ref ParentSSHBastionStack, '']
+Resources:
+  PrivateKey:
+    Type: Custom::RSAKey
+    Properties:
+      Name: !Sub '/${AWS::StackName}/ec2-user/private-key'
+      Version: v1
+      NoEcho: True
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-secret-provider'
+  Logs:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      RetentionInDays: 14
+  SecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: !Ref Name
+      VpcId:
+        'Fn::ImportValue': !Sub '${ParentVPCStack}-VPC'
+  SecurityGroupInSSHBastion:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Condition: HasSSHBastionSecurityGroup
+    Properties:
+      GroupId: !Ref SecurityGroup
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      SourceSecurityGroupId:
+        'Fn::ImportValue': !Sub '${ParentSSHBastionStack}-SecurityGroup'
+  SecurityGroupInSSHWorld:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Condition: HasNotSSHBastionSecurityGroup
+    Properties:
+      GroupId: !Ref SecurityGroup
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: 0.0.0.0/0
+  SecurityGroupIngressTcp:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SecurityGroup
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      CidrIp: 0.0.0.0/0
+  InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref IAMRole
+  IAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns: !If [HasSystemsManagerAccess, ['arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM'], []]
+      Policies:
+        - PolicyName: testlogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                  - 'logs:DescribeLogStreams'
+                Resource:
+                  - 'arn:aws:logs:*:*:*'
+        - PolicyName: ecraccess
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:CreateRepository
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:GetAuthorizationToken
+                  - ecr:UploadLayerPart
+                  - ecr:BatchDeleteImage
+                  - ecr:ListImages
+                  - ecr:DeleteRepository
+                  - ecr:PutImage
+                  - ecr:SetRepositoryPolicy
+                  - ecr:BatchGetImage
+                  - ecr:CompleteLayerUpload
+                  - ecr:DescribeImages
+                  - ecr:DescribeRepositories
+                  - ecr:InitiateLayerUpload
+                  - ecr:DeleteRepositoryPolicy
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetRepositoryPolicy
+                  - ecr:PutLifecyclePolicy
+                Resource:
+                  - '*'
+  IAMPolicySSHAccess:
+    Type: 'AWS::IAM::Policy'
+    Condition: HasIAMUserSSHAccess
+    Properties:
+      Roles:
+        - !Ref IAMRole
+      PolicyName: iam
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'iam:ListUsers'
+            Resource:
+              - '*'
+          - Effect: Allow
+            Action:
+              - 'iam:ListSSHPublicKeys'
+              - 'iam:GetSSHPublicKey'
+            Resource:
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:user/*'
+  TestMachine:
+    Type: 'AWS::EC2::Instance'
+    Metadata:
+      'AWS::CloudFormation::Init':
+        storage:
+          commands:
+            1_pvcreate:
+              command: pvcreate /dev/xvdf
+        configSets:
+          default: !If [HasIAMUserSSHAccess, ['journald-cloudwatch-logs', awslogs, ssh-access, config], ['journald-cloudwatch-logs', awslogs, config]]
+        'journald-cloudwatch-logs':
+          sources:
+            '/root': 'https://github.com/saymedia/journald-cloudwatch-logs/releases/download/v0.0.1/journald-cloudwatch-logs-linux.zip'
+          files:
+            '/usr/local/etc/journald-cloudwatch-logs.conf':
+              content: !Sub |
+                log_group = "${Logs}"
+                state_file = "/var/lib/journald-cloudwatch-logs/state"
+            '/usr/lib/systemd/system/journald-cloudwatch-logs.service':
+              content: |
+                [Unit]
+                Description=journald-cloudwatch-logs
+                After=network-online.target
+
+                [Service]
+                Type=simple
+                ExecStart=/usr/local/bin/journald-cloudwatch-logs /usr/local/etc/journald-cloudwatch-logs.conf
+                Restart=always
+                RestartSec=3
+
+                [Install]
+                WantedBy=multi-user.target
+          commands:
+            'a_create_state_dir':
+              command: 'mkdir /var/lib/journald-cloudwatch-logs'
+              test: '[ ! -d /var/lib/journald-cloudwatch-logs ]'
+            'b_create_state_file':
+              command: 'touch /var/lib/journald-cloudwatch-logs/state'
+              test: '[ ! -f /var/lib/journald-cloudwatch-logs/state ]'
+            'd_mv_bin':
+              command: 'mv /root/journald-cloudwatch-logs/journald-cloudwatch-logs /usr/local/bin/journald-cloudwatch-logs'
+              test: '[ ! -f /usr/local/bin/journald-cloudwatch-logs ]'
+          services:
+            sysvinit:
+              'journald-cloudwatch-logs':
+                enabled: true
+                ensureRunning: true
+                files:
+                - '/usr/local/etc/journald-cloudwatch-logs.conf'
+        awslogs:
+          packages:
+            yum:
+              awslogs: []
+          files:
+            /etc/awslogs/awscli.conf:
+              content: !Sub |
+                [default]
+                region = ${AWS::Region}
+                [plugins]
+                cwlogs = cwlogs
+              mode: '000644'
+              owner: root
+              group: root
+            /etc/awslogs/awslogs.conf:
+              content: !Sub |
+                [general]
+                state_file = /var/lib/awslogs/agent-state
+                [/var/log/amazon/ssm/amazon-ssm-agent.log]
+                datetime_format = %Y-%m-%d %H:%M:%S
+                file = /var/log/amazon/ssm/amazon-ssm-agent.log
+                log_stream_name = {instance_id}/var/log/amazon/ssm/amazon-ssm-agent.log
+                log_group_name = ${Logs}
+                [/var/log/awslogs.log]
+                datetime_format = %Y-%m-%d %H:%M:%S
+                file = /var/log/awslogs.log
+                log_stream_name = {instance_id}/var/log/awslogs.log
+                log_group_name = ${Logs}
+                [/var/log/boot.log]
+                file = /var/log/boot.log
+                log_stream_name = {instance_id}/var/log/boot.log
+                log_group_name = ${Logs}
+                [/var/log/cfn-hup.log]
+                datetime_format = %Y-%m-%d %H:%M:%S
+                file = /var/log/cfn-hup.log
+                log_stream_name = {instance_id}/var/log/cfn-hup.log
+                log_group_name = ${Logs}
+                [/var/log/cfn-init-cmd.log]
+                datetime_format = %Y-%m-%d %H:%M:%S
+                file = /var/log/cfn-init-cmd.log
+                log_stream_name = {instance_id}/var/log/cfn-init-cmd.log
+                log_group_name = ${Logs}
+                [/var/log/cfn-init.log]
+                datetime_format = %Y-%m-%d %H:%M:%S
+                file = /var/log/cfn-init.log
+                log_stream_name = {instance_id}/var/log/cfn-init.log
+                log_group_name = ${Logs}
+                [/var/log/cfn-wire.log]
+                datetime_format = %Y-%m-%d %H:%M:%S
+                file = /var/log/cfn-wire.log
+                log_stream_name = {instance_id}/var/log/cfn-wire.log
+                log_group_name = ${Logs}
+                [/var/log/cloud-init-output.log]
+                file = /var/log/cloud-init-output.log
+                log_stream_name = {instance_id}/var/log/cloud-init-output.log
+                log_group_name = ${Logs}
+                [/var/log/cloud-init.log]
+                datetime_format = %b %d %H:%M:%S
+                file = /var/log/cloud-init.log
+                log_stream_name = {instance_id}/var/log/cloud-init.log
+                log_group_name = ${Logs}
+                [/var/log/dmesg]
+                file = /var/log/dmesg
+                log_stream_name = {instance_id}/var/log/dmesg
+                log_group_name = ${Logs}
+                [/var/log/grubby_prune_debug]
+                file = /var/log/grubby_prune_debug
+                log_stream_name = {instance_id}/var/log/grubby_prune_debug
+                log_group_name = ${Logs}
+                [/var/log/yum.log]
+                datetime_format = %b %d %H:%M:%S
+                file = /var/log/yum.log
+                log_stream_name = {instance_id}/var/log/yum.log
+                log_group_name = ${Logs}
+              mode: '000644'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              awslogsd:
+                enabled: true
+                ensureRunning: true
+                packages:
+                  yum:
+                    - awslogs
+                files:
+                  - /etc/awslogs/awslogs.conf
+                  - /etc/awslogs/awscli.conf
+        ssh-access:
+          packages:
+            yum:
+              docker: []
+          files:
+            /opt/authorized_keys_command.sh:
+              content: |
+                #!/bin/bash -e
+                if [ -z "$1" ]; then
+                  exit 1
+                fi
+                UnsaveUserName="$1"
+                UnsaveUserName=${UnsaveUserName//".plus."/"+"}
+                UnsaveUserName=${UnsaveUserName//".equal."/"="}
+                UnsaveUserName=${UnsaveUserName//".comma."/","}
+                UnsaveUserName=${UnsaveUserName//".at."/"@"}
+                aws iam list-ssh-public-keys --user-name "$UnsaveUserName" --query "SSHPublicKeys[?Status == 'Active'].[SSHPublicKeyId]" --output text | while read -r KeyId; do
+                  aws iam get-ssh-public-key --user-name "$UnsaveUserName" --ssh-public-key-id "$KeyId" --encoding SSH --query "SSHPublicKey.SSHPublicKeyBody" --output text
+                done
+              mode: '000755'
+              owner: root
+              group: root
+            /opt/import_users.sh:
+              content: |
+                #!/bin/bash -e
+                aws iam list-users --query "Users[].[UserName]" --output text | while read User; do
+                  SaveUserName="$User"
+                  SaveUserName=${SaveUserName//"+"/".plus."}
+                  SaveUserName=${SaveUserName//"="/".equal."}
+                  SaveUserName=${SaveUserName//","/".comma."}
+                  SaveUserName=${SaveUserName//"@"/".at."}
+                  if [ "${#SaveUserName}" -le "32" ]; then
+                    if ! id -u "$SaveUserName" >/dev/null 2>&1; then
+                      # sudo will read each file in /etc/sudoers.d, skipping file names that end in ‘~’ or contain a ‘.’ character to avoid causing problems with package manager or editor temporary/backup files.
+                      SaveUserFileName=$(echo "$SaveUserName" | tr "." " ")
+                      /usr/sbin/useradd "$SaveUserName"
+                      echo "$SaveUserName ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/$SaveUserFileName"
+                      # Add the user to the docker group
+                      usermod -aG docker "$SaveUserName"
+                    fi
+                  else
+                    echo "Can not import IAM user ${SaveUserName}. User name is longer than 32 characters."
+                  fi
+                done
+              mode: '000755'
+              owner: root
+              group: root
+            /etc/cron.d/import_users:
+              content: |
+                */10 * * * * root /opt/import_users.sh
+              mode: '000644'
+              owner: root
+              group: root
+          commands:
+            a_configure_sshd_command:
+              command: 'sed -i "s:#AuthorizedKeysCommand none:AuthorizedKeysCommand /opt/authorized_keys_command.sh:g" /etc/ssh/sshd_config'
+            b_configure_sshd_commanduser:
+              command: 'sed -i "s:#AuthorizedKeysCommandUser nobody:AuthorizedKeysCommandUser nobody:g" /etc/ssh/sshd_config'
+            c_import_users:
+              command: ./import_users.sh
+              cwd: /opt
+          services:
+            sysvinit:
+              sshd:
+                enabled: true
+                ensureRunning: true
+                commands:
+                  - a_configure_sshd_command
+                  - b_configure_sshd_commanduser
+        config:
+          packages:
+            yum:
+              docker: []
+              git: []
+          files:
+            /etc/cfn/cfn-hup.conf:
+              content: !Sub |
+                [main]
+                stack=${AWS::StackId}
+                region=${AWS::Region}
+                interval=1
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              content: !Sub |
+                [cfn-auto-reloader-hook]
+                triggers=post.update
+                path=Resources.VirtualMachine.Metadata.AWS::CloudFormation::Init
+                action=/opt/aws/bin/cfn-init --verbose --stack=${AWS::StackName} --region=${AWS::Region} --resource=TestMachine
+                runas=root
+            /etc/docker/daemon.json:
+              content: |
+                {
+                  "storage-driver": "devicemapper",
+                  "storage-opts": [
+                    "dm.directlvm_device=/dev/sdf",
+                    "dm.thinp_percent=95",
+                    "dm.thinp_metapercent=1",
+                    "dm.thinp_autoextend_threshold=80",
+                    "dm.thinp_autoextend_percent=20",
+                    "dm.directlvm_device_force=false"
+                  ]
+                }
+            /usr/lib/systemd/system/nginx_proxy.service:
+              content: |
+                [Unit]
+                Description=nginx_proxy
+                Requires=docker.service
+                After=docker.service
+
+                [Service]
+                ExecStart=/usr/bin/docker start -a nginx_proxy
+                ExecStop=/usr/bin/docker stop -t 2 nginx_proxy
+                Restart=always
+                RestartSec=3
+
+                [Install]
+                WantedBy=multi-user.target
+            /opt/install_nginx_proxy.sh:
+              content: |
+                #!/bin/bash -e
+                systemctl start docker
+                docker pull jwilder/nginx-proxy
+                docker create -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock --name nginx_proxy -t jwilder/nginx-proxy
+              mode: '000755'
+              owner: root
+              group: root
+            /opt/install_rsa_keys.sh:
+              content: !Sub |
+                #!/bin/bash -e
+                aws ssm get-parameters \
+                  --region "${AWS::Region}" \
+                  --names "/${AWS::StackName}/ec2-user/private-key" \
+                  --with-decryption \
+                  --output text | cut -f4 > /home/ec2-user/.ssh/id_rsa
+                chmod 400 /home/ec2-user/.ssh/id_rsa
+                chown ec2-user:ec2-user /home/ec2-user/.ssh/id_rsa
+                usermod -aG docker ec2-user
+              mode: '000755'
+              owner: root
+              group: root
+            /home/ec2-user/.ssh/id_rsa.pub:
+              content: !Sub |
+                ${PrivateKey.PublicKey}
+              mode: '000400'
+              owner: ec2-user
+              group: ec2-user
+          commands:
+            a_install_nginx_proxy:
+              command: ./install_nginx_proxy.sh
+              cwd: /opt
+            a_install_rsa_keys:
+              command: ./install_rsa_keys.sh
+              cwd: /opt
+          services:
+            sysvinit:
+              cfn-hup:
+                enabled: true
+                ensureRunning: true
+                files:
+                  - /etc/cfn/cfn-hup.conf
+                  - /etc/cfn/hooks.d/cfn-auto-reloader.conf
+              amazon-ssm-agent:
+                enabled: !If [HasSystemsManagerAccess, true, false]
+                ensureRunning: !If [HasSystemsManagerAccess, true, false]
+              docker:
+                enabled: true
+                ensureRunning: true
+                packages:
+                  yum:
+                  - docker
+              nginx_proxy:
+                enabled: true
+                ensureRunning: true
+                commands:
+                - a_install_nginx_proxy
+    Properties:
+      BlockDeviceMappings:
+        - DeviceName: /dev/sdf
+          Ebs:
+            DeleteOnTermination: false
+            VolumeSize: 30
+            VolumeType: gp2
+      IamInstanceProfile: !Ref InstanceProfile
+      ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', AMI]
+      InstanceType: !Ref InstanceType
+      PrivateIpAddress: !Ref PrivateIPAddress
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+      KeyName: !If [HasKeyName, !Ref KeyName, !Ref 'AWS::NoValue']
+      SubnetId:
+        'Fn::ImportValue': !Sub '${ParentVPCStack}-SubnetAPublic'
+      UserData:
+        'Fn::Base64': !Sub |
+          #!/bin/bash -ex
+          trap '/opt/aws/bin/cfn-signal -e 1 --region ${AWS::Region} --stack ${AWS::StackName} --resource TestMachine' ERR
+          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource TestMachine --region ${AWS::Region}
+          /opt/aws/bin/cfn-signal -e 0 --region ${AWS::Region} --stack ${AWS::StackName} --resource TestMachine
+      Tags:
+      - Key: Name
+        Value: !Ref Name
+    CreationPolicy:
+      ResourceSignal:
+        Count: 1
+        Timeout: PT10M
+Outputs:
+  StackName:
+    Description: Stack name.
+    Value: !Sub '${AWS::StackName}'
+  InstanceId:
+    Description: The EC2 instance id.
+    Value: !Ref TestMachine
+    Export:
+      Name: !Sub '${AWS::StackName}-InstanceId'
+  PublicKey:
+    Value: !GetAtt 'PrivateKey.PublicKey'
+    Description: the public key, safe to expose
+  PrivateKeyArn:
+    Value: !GetAtt 'PrivateKey.Arn'
+    Description: ARN of the private key in the Parameter Store
