@@ -1,0 +1,12 @@
+[Unit]
+Description=%(APP_NAME)s-%(INSTANCE_NAME)s
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/docker start -a %(APP_NAME)s-%(INSTANCE_NAME)s
+ExecStop=/usr/bin/docker stop -t 2 %(APP_NAME)s-%(INSTANCE_NAME)s
+
+[Install]
+WantedBy=default.target
