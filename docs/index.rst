@@ -1,5 +1,6 @@
-Welcome to Lab Test's documentation!
-======================================
+========
+Lab Test
+========
 
 Contents:
 
@@ -8,9 +9,13 @@ Contents:
 
    readme
    installation
+   configuration
+   how_it_works
    usage
+   modules
    contributing
-   authorshistory
+   authors
+   history
 
 Indices and tables
 ==================

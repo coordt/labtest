@@ -6,8 +6,8 @@ Lab Test
 .. image:: https://img.shields.io/pypi/v/labtest.svg
         :target: https://pypi.python.org/pypi/labtest
 
-.. image:: https://img.shields.io/travis/coordt/labtest.svg
-        :target: https://travis-ci.org/coordt/labtest
+.. image:: https://img.shields.io/travis/CityOfBoston/labtest.svg
+        :target: https://travis-ci.org/CityOfBoston/labtest
 
 .. image:: https://readthedocs.org/projects/labtest/badge/?version=latest
         :target: https://labtest.readthedocs.io/en/latest/?badge=latest
@@ -71,36 +71,29 @@ Goals
 ``labtest setsecret KEY=value``
 
 
-Configuration
--------------
 
-Would like to use several methods to get the configuration information instead of
-requiring another file in the repo.
 
-Supported methods:
+Two phases: Bulid phase and install phase
 
-Automatic:
+    - Build phase
+        - Git checkout of the repo
+        - App build phase:
+            - This phase does whatever is necessary to build the application before the docker container is built
+            - Runs build commands in a specified docker container
+            - The container maps a specified directory on the container to the git checkout
+        - Container build phase
+            - Builds using a specified Docker file and any other build params
+            - Tags and uploads the image to repository
+    - Install phase
+        - setup service
+        - setup environment vars
+        - other parts of the docker stuff
 
-    - .labtest.yml
-    - setup.cfg (under [labtest])
-    - package.json (under labtest key)
 
-Command line
-    - Command line options (will override any config)
-    - .ini under [labtest]
-    - .yml under labtest
-    - .json under labtest
 
-config (to specify the configuration file)
-
-app_name
-
-hosts
-
-use_ssh_config
-
-provider
-
+- Specify a docker repo/image to use to build
+- Code is checked out on main server, mapped to docker container
+- Follow travis' or shippable's method for install and build
 
 Features
 --------

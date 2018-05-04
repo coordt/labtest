@@ -5,7 +5,7 @@ Credits
 Development Lead
 ----------------
 
-* Corey Oordt <coreyoordt@gmail.com>
+* Corey Oordt <corey.oordt@boston.gov>
 
 Contributors
 ------------
