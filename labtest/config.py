@@ -11,12 +11,38 @@ class LabTestConfig(Config):
     ]
     namespace = 'labtest'
     required_attrs = [
-        'code_repo_url',
         'host',
         'app_name',
-        'provider',
-        'env_template',
+        'test_domain',
+        'container_provider',
+        'build_provider',
     ]
+    dependencies = {
+        'build_provider': {
+            'default': [
+                'code_repo_url', 'app_build_image', 'app_build_command',
+                'container_build_command', 'container_provider',
+            ]
+        }
+    }
+
+    def get_default_build_provider(self):
+        """
+        The default provider of the build
+        """
+        return 'default'
+
+    def get_default_docker_image_pattern(self):
+        """
+        Return the default docker image name pattern
+        """
+        return '%(APP_NAME)s/%(INSTANCE_NAME)s:latest'
+
+    def get_default_host_name_pattern(self):
+        """
+        Return the default host name pattern
+        """
+        return '%(APP_NAME)s-%(INSTANCE_NAME)s'
 
     def set_use_ssh_config(self, value):
         """
@@ -34,6 +60,27 @@ class LabTestConfig(Config):
     def get_default_use_ssh_config(self):
         return False
 
+    def set_environment(self, value):
+        """
+        Make sure the environment is a list
+        """
+        if isinstance(value, basestring):
+            self._config['environment'] = value.split(',')
+        elif isinstance(value, (list, tuple)):
+            self._config['environment'] = list(value)  # convert tuples to list
+
+    def get_default_environment(self):
+        """
+        Return an empty list as the default environment
+        """
+        return []
+
+    def get_default_container_provider(self):
+        """
+        Where are the images stored by default?
+        """
+        return 'local'
+
     def get_default_container_build_command(self):
         return 'docker build -t $APP_NAME/$INSTANCE_NAME --build-arg RELEASE=$RELEASE --build-arg APP_NAME=$APP_NAME --build-arg BRANCH_NAME=$BRANCH_NAME --build-arg INSTANCE_NAME=$INSTANCE_NAME .'
 
@@ -46,6 +93,23 @@ class LabTestConfig(Config):
         out = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'])
         dirname, name = os.path.split(out.strip())
         return name
+
+    def validate_dependencies(self):
+        """
+        Make sure extra options are set, if necessary
+        """
+        config = self.config
+        missing_attrs = []
+
+        for option, dependency in self.dependencies.items():
+            for dep_option in dependency.get(config[option], []):
+                if dep_option not in config:
+                    default_func = getattr(self, 'get_default_{}'.format(dep_option), None)
+                    if default_func:
+                        setattr(self, dep_option, default_func())
+                    else:
+                        missing_attrs.append(dep_option)
+        return missing_attrs
 
 
 def get_config(filepath='', **kwargs):

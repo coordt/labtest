@@ -41,9 +41,21 @@ class Config(object):
         It doesn't just return the default `_config` dict.
         """
         cfg = {}
+        for item in self.required_attrs:
+            if item not in self._config:
+                default_func = getattr(self, 'get_default_{}'.format(item), None)
+                if default_func:
+                    cfg[item] = default_func()
         for key, val in self._config.items():
             cfg[key] = getattr(self, key)
         return cfg
+
+    def validate_dependencies(self):
+        """
+        Subclasses should override this command to provide validation for options
+        that are required based on other option's values
+        """
+        pass
 
     def validate(self):
         """
@@ -57,6 +69,9 @@ class Config(object):
             if attr not in config:
                 is_valid = False
                 missing_attrs.append(attr)
+
+        missing_attrs.extend(self.validate_dependencies())
+
         if missing_attrs:
             self._validation_errors['Missing Attributes'] = missing_attrs
         return is_valid
@@ -100,7 +115,7 @@ class Config(object):
         elif hasattr(self, attr_default_name):
             self._config[name] = getattr(self, attr_default_name)()
             return self._config[name]
-        raise AttributeError
+        raise AttributeError('The configuration attribute "{}" is not set.'.format(name))
 
     def __setattr__(self, name, value):
         """
