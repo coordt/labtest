@@ -2,7 +2,7 @@
 import click
 from fabric.api import env, sudo, run, task, execute, cd
 from fabric.contrib.files import upload_template, exists
-from fabric.operations import put, get
+from fabric.operations import put
 from fabric.context_managers import settings
 
 
@@ -12,6 +12,14 @@ def _git_cmd(cmd):
     """
     final_cmd = cmd.format(**env)
     return sudo(final_cmd, user='ec2-user', quiet=env.quiet)
+
+
+def _virtual_host_name():
+    """
+    Calculate the virtual host name from the test domain and the host name pattern
+    """
+    host_name = env.host_name_pattern % env.context
+    return '.'.join([host_name, env.test_domain])
 
 
 def _setup_path():
@@ -124,12 +132,15 @@ def _setup_templates():
     from StringIO import StringIO
 
     env_dest = '/testing/{app_name}/{instance_name}/test.env'.format(**env)
-    template = StringIO()
     contents = StringIO()
     if not exists(env_dest):
         with cd(env.instance_path):
-            get(remote_path=env.env_template, local_path=template)
-            contents.write(template.getvalue() % env.context)
+            virtual_host = _virtual_host_name()
+            contents.write('VIRTUAL_HOST={}'.format(virtual_host))
+            for key, val in env.context:
+                contents.write('{}={}'.format(key, val))
+            for item in env.environment:
+                contents.write(item)
             put(local_path=contents, remote_path=env_dest)
 
 
@@ -147,7 +158,8 @@ def _update_image():
             sudo('systemctl stop {app_name}-{instance_name}'.format(**env))
         run('docker rm -f {app_name}-{instance_name}'.format(**env))
 
-    run('docker create --env-file /testing/{app_name}/{instance_name}/test.env --name {app_name}-{instance_name} {app_name}/{instance_name}:latest'.format(**env))
+    env.docker_image = env.docker_image_pattern % env
+    run('docker create --env-file /testing/{app_name}/{instance_name}/test.env --name {app_name}-{instance_name} {docker_image}'.format(**env))
 
     # If the container existed before, we need to start it again
     if len(containers) > 0:
