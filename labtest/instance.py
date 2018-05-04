@@ -210,4 +210,4 @@ def create(ctx, branch, name):
 
     env.instance_name = name
     env.branch_name = branch
-    execute(create_instance, branch, name, hosts=ctx.obj.hosts)
+    execute(create_instance, branch, name, hosts=ctx.obj.host)

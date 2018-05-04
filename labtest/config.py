@@ -12,22 +12,11 @@ class LabTestConfig(Config):
     namespace = 'labtest'
     required_attrs = [
         'code_repo_url',
-        'hosts',
+        'host',
         'app_name',
         'provider',
         'env_template',
     ]
-
-    def set_hosts(self, value):
-        """
-        Make sure it is a tuple or list, or convert it to a list
-        """
-        if isinstance(value, basestring):
-            self._config['hosts'] = [value]
-        elif isinstance(value, (tuple, list)):
-            self._config['hosts'] = value
-        else:
-            raise AttributeError("hosts must be a string or list of strings.")
 
     def set_use_ssh_config(self, value):
         """
@@ -59,13 +48,6 @@ class LabTestConfig(Config):
         return name
 
 
-def convert_env_name(key):
-    """
-    Convert the environmental variable name into the proper config name
-    """
-    return key.lower()
-
-
 def get_config(filepath='', **kwargs):
     """
     Get the configuration based off all the ways you can pass it
@@ -74,11 +56,7 @@ def get_config(filepath='', **kwargs):
 
     Precedence:
         1. Command-line arguments
-        2. Environmental variables
-        3. Configuration file
-            a. .labtest.yml
-            b. setup.cfg
-            c. package.json
+        2. Configuration file
     """
     config = LabTestConfig()
     if not filepath:
