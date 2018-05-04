@@ -1,8 +1,16 @@
 {
     "labtest": {
         "app_name": "testing",
-        "hosts": "10.2.3.4",
+        "host": "10.2.3.4",
         "use_ssh_config": true,
-        "provider": "aws"
+        "code_repo_url": "git@github.com:CityOfBoston/testdemo.git",
+        "test_domain": "test.example.com",
+        "app_build_image": "drydock/u16nodall",
+        "app_build_command": "./bin/app-build",
+        "environment": [
+            "FOO=bar",
+            "TEST=true",
+            "DEBUG=true"
+        ]
     }
 }

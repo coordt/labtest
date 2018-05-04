@@ -1,8 +1,7 @@
 {
     "foo": {
         "app_name": "testing",
-        "hosts": "10.2.3.4",
-        "use_ssh_config": true,
-        "provider": "aws"
+        "host": "10.2.3.4",
+        "use_ssh_config": true
     }
 }
