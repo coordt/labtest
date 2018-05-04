@@ -94,4 +94,37 @@ Creating an experiment
 
 .. image:: images/test-instance-steps.png
 
-Creating an experiment is based on the idea of a mini-deployment.
+Creating an experiment is based on the idea of a mini-deployment using a Docker container. Each experiment has three parts: the application name, the branch name and the instance name. The application name is the name of the project or application. This provides a namespace for the instance names. If you are testing multiple applications, you might have branches with the same name across the different projects.
+
+Typically the instance name is the same as the branch name, but they don't have to be. You can have two experiments using the same branch, but with different instance names.
+
+**Create experiment space.** The step creates a space to store files it might need. The space is at ``/testing/<app name>/<instance name>``\ .
+
+**Trigger build.** The result of this step is a compiled Docker image. Test Lab has a :ref:`default process <default-build-process>`\ , or you can use your own existing process that generates the image.
+
+**Create container from image.** There are two parts to this: creating an environment file and creating the container. The environment file is automatically generated from the values in :ref:`environment_config_option`, plus a few extras:
+
+- ``VIRTUAL_HOST`` is created from the :ref:`host_name_pattern_config_option` and :ref:`test_domain_config_option`\ .
+- ``APP_NAME`` is :ref:`app_name_config_option`\ .
+- ``INSTANCE_NAME`` is name of the test instance.
+- ``BRANCH_NAME`` is name of the branch.
+
+The container is created and named using the `docker create`_ command. This allows us to start, stop and restart the container as an Systemd service.
+
+**Create backing services.** *Coming soon!* This step will set up any backing services you need, such as databases and caches.
+
+**Create OS Service.** This step creates Systemd services to start and stop the containers. It makes sure they are started in case of a reboot of the machine as well.
+
+.. _docker create: https://docs.docker.com/engine/reference/commandline/create/
+
+
+.. _default-build-process:
+
+Default build process
+~~~~~~~~~~~~~~~~~~~~~
+
+**Check out code.**
+
+**Build application.**
+
+**Build Docker image.**

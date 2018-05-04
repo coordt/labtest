@@ -37,26 +37,20 @@ Required configuration options
 
 There are several options that are required in order for Lab Test to work correctly.
 
-.. _hosts_config_option:
+.. _host_config_option:
 
 host
 ----
 
 The DNS name, IP address or SSH config ``Host`` of the test server.
 
-.. _code_repo_url_config_option:
 
-code_repo_url
--------------
+.. _test_domain_config_option:
 
-The URL of the code repository to check out.
+test_domain
+-----------
 
-.. _env_template_config_option:
-
-env_template
-------------
-
-The code repository-relative path of the environment template.
+The DNS subdomain in which the test server lives. This is the wildcard DNS name without the ``*.``\ , like ``test.example.com``\ . This is used with :ref:`host_name_pattern_config_option` to create the virtual host name.
 
 Optional configuration options
 ==============================
@@ -66,7 +60,65 @@ Optional configuration options
 app_name
 --------
 
-The name of the application. It defaults to the name of the project directory.
+*Default:* name of the project directory
+
+The name of the application. Ideally this should be a URL-friendly value. In order to get the default value, the labtest command must be made from within a Git repository.
+
+
+.. _host_name_pattern_config_option:
+
+host_name_pattern
+-----------------
+
+*Default:* ``%(APP_NAME)s-%(INSTANCE_NAME)s``
+
+The pattern to use to generate the host part of the DNS address. This is used with :ref:`test_domain_config_option` to generate the virtual host name.
+
+This pattern may contain `Python string interpolation formatting`_. The context passed to this includes:
+
+- ``APP_NAME``
+- ``INSTANCE_NAME``
+- ``BRANCH_NAME``
+
+.. _python string interpolation formatting: https://docs.python.org/3/library/stdtypes.html#old-string-formatting
+
+
+.. _environment_config_option:
+
+environment
+-----------
+
+*Default:* ``[]``
+
+A list of environment variable strings to include in the Docker container.
+
+.. code-block:: yaml
+   :caption: Example in YAML
+
+   labtest:
+     environment:
+       - FOO=bar
+       - TEST=true
+       - DEBUG=true
+
+.. code-block:: json
+   :caption: Example in JSON
+
+   {
+     "labtest": {
+       "environment": [
+         "FOO=bar",
+         "TEST=true",
+         "DEBUG=true"
+       ]
+     }
+   }
+
+.. code-block:: ini
+   :caption: Example in INI
+
+   [labtest]
+   environment = FOO=bar,TEST=true,DEBUG=true
 
 
 .. _use_ssh_config_config_option:
@@ -74,15 +126,60 @@ The name of the application. It defaults to the name of the project directory.
 use_ssh_config
 --------------
 
-Use your local SSH config when connecting
+*Default:* ``False``
+
+Use your local SSH config when connecting. For example, if you set this option to ``True`` and add these items (changing the various ``User`` and ``Hostname`` values) to your ``~/.ssh/config``\ :
+
+.. code-block:: none
+
+   Host bastion
+   Hostname 111.222.111.222
+   Port 22
+   User monty.python.at.boston.gov
+   IdentityFile ~/.ssh/id_rsa
+
+   Host test
+   Hostname 10.20.10.5
+   User monty.python.at.boston.gov
+   Port 22
+   ProxyCommand ssh -A -T bastion nc %h %p
+   IdentityFile ~/.ssh/id_rsa
+
+You can now set the :ref:`host_config_option` configuration to ``test`` and it will route everything through the SSH bastion in the test environment. You can even ``ssh test`` from the command line.
 
 
-.. _provider_config_option:
+.. _docker_image_pattern_config_option:
 
-provider
---------
+docker_image_pattern
+--------------------
 
-This is to extend how Lab Test can talk to different Docker container repositories. Currently only aws is supported.
+*Default:* ``%(APP_NAME)s/%(INSTANCE_NAME)s:latest``
+
+The image to use to build the container. Allows `Python string interpolation formatting`_\ , with ``APP_NAME`` and ``INSTANCE_NAME`` in the context
+
+The value of this option depends on how your Docker images are built. (See `docker pull documentation`_ for more information about specifying images) If they are built using the default Lab Test method (the default), then the images will be local to the test server and can use a simple name. If the Docker images are built using an external process and in a private repo, the name will look like a URL, without the ``https://``\ .
+
+.. _docker pull documentation: https://docs.docker.com/engine/reference/commandline/pull/
+
+
+.. _build_provider_config_option:
+
+build_provider
+--------------
+
+*Default:* ``local``
+
+This is how your application and Docker image are built. Currently only ``local`` is supported.
+
+You must also set :ref:`code_repo_url_config_option`, :ref:`app_build_image_config_option`, :ref:`app_build_command_config_option`. If the default for :ref:`container_build_command_config_option` doesn't work for your project, set that too.
+
+
+.. _code_repo_url_config_option:
+
+code_repo_url
+-------------
+
+The URL of the code repository to check out.
 
 
 .. _app_build_image_config_option:
@@ -131,16 +228,12 @@ or:
     app_build_command: bash bin/build_my_app
 
 
-.. container_build_command_config_option:
+.. _container_build_command_config_option:
 
 container_build_command
 -----------------------
 
-What command to use to build the container for your app.
-
-Lab Test appends your command to a script that sets the following variables: ``$APP_NAME``, ``$INSTANCE_NAME``, ``$BRANCH_NAME``, and ``$RELEASE``.
-
-The default build command is (formatted for clarity):
+*Default:* (reformatted for clarity)
 
 .. code-block:: bash
 
@@ -152,6 +245,20 @@ The default build command is (formatted for clarity):
         --build-arg INSTANCE_NAME=$INSTANCE \
         .
 
+This is the command to use to build the container for your app.
+
+Lab Test appends this command to a script that sets the following variables: ``$APP_NAME``, ``$INSTANCE_NAME``, ``$BRANCH_NAME``, and ``$RELEASE``.
+
 If you override the docker build command, you *must* still tag it with ``$APP/$INSTANCE`` or the remaining commands will fail.
 
-If your ``Dockerfile`` doesn't use the default ``--build-arg``\ s passed, they are ignored.
+:note: If your ``Dockerfile`` doesn't use the default ``--build-arg``\ s passed, they are ignored.
+
+
+.. _container_provider_config_option:
+
+container_provider
+------------------
+
+*Default:* ``local``
+
+This is to extend how Lab Test can talk to different Docker container repositories. Currently only ``local`` and ``aws`` are supported.

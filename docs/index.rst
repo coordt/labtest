@@ -8,6 +8,7 @@ Contents:
    :maxdepth: 2
 
    readme
+   getting_started
    installation
    configuration
    how_it_works
