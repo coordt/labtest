@@ -1,3 +1,4 @@
+fabric
 click
 python-dotenv
 oyaml
