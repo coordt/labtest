@@ -38,7 +38,7 @@ def _remove_path():
     Remove the path o the remote server
     """
     if exists(env.instance_path):
-        sudo('rm -Rf {}'.format(env.instance_path))
+        sudo('rm -Rf {}'.format(env.instance_path), quiet=env.quiet)
 
 
 def _checkout_code():
@@ -65,7 +65,7 @@ def _app_build():
         msg = 'Building the application using {app_build_image} and {app_build_command}.'.format(**env)
         click.echo(msg)
         cmd = 'docker run --rm -ti -v {instance_path}:/build -w /build {app_build_image} {app_build_command}'.format(**env)
-        run(cmd)
+        run(cmd, quiet=env.quiet)
 
 
 def _put_docker_build_cmd():
@@ -94,8 +94,8 @@ def _container_build():
     _put_docker_build_cmd()
 
     with cd(env.instance_path):
-        run('docker image prune -f')
-        run('./docker-build -a {app_name} -i {instance_name}'.format(**env))
+        run('docker image prune -f', quiet=env.quiet)
+        run('./docker-build -a {app_name} -i {instance_name}'.format(**env), quiet=env.quiet)
 
 
 def _setup_service():
@@ -109,9 +109,9 @@ def _setup_service():
     systemd_dest = '/etc/systemd/system/{app_name}-{instance_name}.service'.format(**env)
     if not exists(systemd_dest):
         upload_template(systemd_template, systemd_tmp_dest, env.context)
-        sudo('mv {} {}'.format(systemd_tmp_dest, systemd_dest))
-        sudo('systemctl enable {app_name}-{instance_name}.service'.format(**env))
-        sudo('systemctl start {app_name}-{instance_name}.service'.format(**env))
+        sudo('mv {} {}'.format(systemd_tmp_dest, systemd_dest), quiet=env.quiet)
+        sudo('systemctl enable {app_name}-{instance_name}.service'.format(**env), quiet=env.quiet)
+        sudo('systemctl start {app_name}-{instance_name}.service'.format(**env), quiet=env.quiet)
 
 
 def _remove_service():
@@ -120,9 +120,9 @@ def _remove_service():
     """
     systemd_dest = '/etc/systemd/system/{app_name}-{instance_name}.service'.format(**env)
     if exists(systemd_dest):
-        sudo('systemctl disable {app_name}-{instance_name}.service'.format(**env))
-        sudo('systemctl stop {app_name}-{instance_name}.service'.format(**env))
-        sudo('rm {}'.format(systemd_dest))
+        sudo('systemctl disable {app_name}-{instance_name}.service'.format(**env), quiet=env.quiet)
+        sudo('systemctl stop {app_name}-{instance_name}.service'.format(**env), quiet=env.quiet)
+        sudo('rm {}'.format(systemd_dest), quiet=env.quiet)
 
 
 def _setup_templates():
@@ -152,19 +152,19 @@ def _update_image():
     #     "docker pull {repository_url}:latest".format(**env))
 
     # Delete the container if it exists
-    containers = run('docker ps -a --filter name={app_name}-{instance_name} --format "{{{{.ID}}}}"'.format(**env))
+    containers = run('docker ps -a --filter name={app_name}-{instance_name} --format "{{{{.ID}}}}"'.format(**env), quiet=env.quiet)
     if len(containers) > 0:
         with settings(warn_only=True):
-            sudo('systemctl stop {app_name}-{instance_name}'.format(**env))
-        run('docker rm -f {app_name}-{instance_name}'.format(**env))
+            sudo('systemctl stop {app_name}-{instance_name}'.format(**env), quiet=env.quiet)
+        run('docker rm -f {app_name}-{instance_name}'.format(**env), quiet=env.quiet)
 
-    env.docker_image = env.docker_image_pattern % env
-    run('docker create --env-file /testing/{app_name}/{instance_name}/test.env --name {app_name}-{instance_name} {docker_image}'.format(**env))
+    env.docker_image = env.docker_image_pattern % env.context
+    run('docker create --env-file /testing/{app_name}/{instance_name}/test.env --name {app_name}-{instance_name} {docker_image}'.format(**env), quiet=env.quiet)
 
     # If the container existed before, we need to start it again
     if len(containers) > 0:
         with settings(warn_only=True):
-            sudo('systemctl start {app_name}-{instance_name}'.format(**env))
+            sudo('systemctl start {app_name}-{instance_name}'.format(**env), quiet=env.quiet)
 
 
 def _setup_env_with_config(config):
