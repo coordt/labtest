@@ -41,7 +41,7 @@ The primary reason is that it is via SSH that the commands will communicate to s
 The parts
 ~~~~~~~~~
 
-.. image:: images/test-infrastructure.png
+.. image:: /images/test-infrastructure.png
 
 - :abbr:`VPC (Virtual Private Cloud)`
 - SSH Bastion
@@ -70,7 +70,7 @@ We created a `test server template`_ to create this server.
 
 When the Docker container for an experiment runs, it can tell nginx proxy to route all traffic for ``foo.test.example.com`` to it.
 
-.. image:: images/test-server.png
+.. image:: /images/test-server.png
 
 .. _cloud formation template: http://templates.cloudonaut.io/en/stable/vpc/
 .. _widdix: https://cloudonaut.io/
@@ -92,7 +92,7 @@ An experiment is a version (branch) of your code running in a Docker container o
 Creating an experiment
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. image:: images/test-instance-steps.png
+.. image:: /images/test-instance-steps.png
 
 Creating an experiment is based on the idea of a mini-deployment using a Docker container. Each experiment has three parts: the application name, the branch name and the instance name. The application name is the name of the project or application. This provides a namespace for the instance names. If you are testing multiple applications, you might have branches with the same name across the different projects.
 

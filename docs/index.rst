@@ -1,6 +1,6 @@
-========
-Lab Test
-========
+==================
+Lab Test |version|
+==================
 
 Contents:
 
@@ -8,11 +8,12 @@ Contents:
    :maxdepth: 2
 
    readme
+   tutorial
    getting_started
    installation
    configuration
-   how_it_works
    usage
+   admin/index
    modules
    contributing
    authors

@@ -2,6 +2,85 @@
 Getting Started
 ===============
 
+.. _setting_up_your_local_machine:
+
+Setting up your local machine
+=============================
+
+This is a one-time process. It installs the Lab Test package and configures your machine to easily talk to the test server.
+
+Install labtest
+---------------
+
+First we :ref:`install <install_stable>` the Lab Test command line package:
+
+.. code-block:: console
+
+    $ pip install labtest
+
+Public key in IAM
+-----------------
+
+Make sure your public key was added to your AWS IAM account. Without that, you will not be able to SSH into anything.
+
+Configure SSH
+-------------
+
+Let's set up our SSH configuration. We need a few bits of information:
+
+* SSH bastion DNS name or IP address
+* The test server IP address (it is a non-routable IP address, like 10.x.x.x)
+* Your user name. If your username contains ``+``\ , ``=``\ , ``,``\ , or ``@`` you need to convert a few characters:
+
+    - ``+`` to ``.plus.``
+    - ``=`` to ``.equal.``
+    - ``,`` to ``.comma.``
+    - ``@`` to ``.at.``
+
+For this example:
+
+* **SSH bastion IP address:** ``111.222.111.222``
+* **Test server IP address:** ``10.20.3.3``
+* **User name:** ``corey.oordt.at.boston.gov`` (converted from ``corey.oordt@boston.gov``\ )
+
+Now we add some lines to our ``~/.ssh/config`` file:
+
+.. code-block:: none
+    :caption: The addition to the ``~/.ssh/config`` file.
+
+    Host bastion
+    Hostname 111.222.111.222
+    Port 22
+    User corey.oordt.at.boston.gov
+    IdentityFile ~/.ssh/id_rsa
+
+    Host test
+    Hostname 10.20.3.3
+    User corey.oordt.at.boston.gov
+    Port 22
+    ProxyCommand ssh -A -T bastion nc %h %p
+    IdentityFile ~/.ssh/id_rsa
+
+With that in place, you should be able to :command:`ssh` to the test server:
+
+.. code-block:: console
+    :caption: SSH'ing to the test server
+
+    $ ssh test
+    Last login: Sun May  6 15:18:17 2018 from ip-10-20-2-195.ec2.internal
+
+           __|  __|_  )
+           _|  (     /   Amazon Linux 2 AMI
+          ___|\___|___|
+
+    https://aws.amazon.com/amazon-linux-2/
+    No packages needed for security; 56 packages available
+    Run "sudo yum update" to apply all updates.
+    [corey.oordt.at.boston.gov@ip-10-20-10-41 ~]$
+
+You can disconnect by typing :kbd:`control-d` or :kbd:`exit`.
+
+
 Getting your code ready
 =======================
 
@@ -16,6 +95,8 @@ This topic is too broad to go into here. You'll know you are ready when you can 
     docker run --rm -ti myapp
 
 That means your container builds and runs locally.
+
+.. _automating-the-app-build-process:
 
 Automating the app build process
 --------------------------------

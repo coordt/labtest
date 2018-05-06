@@ -4,6 +4,7 @@
 Installation
 ============
 
+.. _install_stable:
 
 Stable release
 --------------
@@ -14,7 +15,7 @@ To install Lab Test, run this command in your terminal:
 
     $ pip install labtest
 
-This is the preferred method to install Lab Test, as it will always install the most recent stable release. 
+This is the preferred method to install Lab Test, as it will always install the most recent stable release.
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
