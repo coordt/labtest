@@ -6,6 +6,7 @@ import click
 class LabTestConfig(Config):
     default_config_files = [
         '.labtest.yml',
+        '.labtest.yaml',
         'setup.cfg',
         'package.json',
     ]
@@ -16,6 +17,9 @@ class LabTestConfig(Config):
         'test_domain',
         'container_provider',
         'build_provider',
+        'host_name_pattern',
+        'environment',
+        'docker_image_pattern',
     ]
     dependencies = {
         'build_provider': {
