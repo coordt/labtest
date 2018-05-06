@@ -10,12 +10,8 @@ deploy:
   provider: pypi
   user: cityofboston
 env:
-- TOXENV=py36
-- TOXENV=py35
-- TOXENV=py34
 - TOXENV=py27
-- TOXENV=pypy
 install: pip install -U tox
 language: python
-python: 3.6
+python: 2.7
 script: tox -e ${TOXENV}
