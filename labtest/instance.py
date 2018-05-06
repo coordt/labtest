@@ -53,8 +53,14 @@ def _checkout_code():
             _git_cmd('chgrp -R docker {instance_path}; chmod -R g+w {instance_path}')
     else:
         with cd(env.instance_path):
+            if 'branch_name' not in env:
+                env.branch_name = _git_cmd('git rev-parse --abbrev-ref HEAD')
             _git_cmd('git fetch --depth 1; git reset --hard origin/{branch_name}; git clean -dfx')
             _git_cmd('chgrp -R docker {instance_path}; chmod -R g+w {instance_path}')
+
+    with cd(env.instance_path):
+        env.release = _git_cmd('git rev-parse --verify HEAD')
+        env.context['RELEASE'] = env.release
 
 
 def _app_build():
