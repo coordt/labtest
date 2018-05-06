@@ -200,20 +200,71 @@ def create_instance(branch, name=''):
     }
     _setup_path()
     _checkout_code()
-    with cd(env.instance_path):
-        env.release = _git_cmd('git rev-parse --verify HEAD')
-        env.context['RELEASE'] = env.release
 
     _app_build()
     _container_build()
 
-    # How to determine if we need to deal with pulling from the repository
+    # TODO: How to determine if we need to deal with pulling from the repository
     # env.repository_url = aws._get_or_create_repository()
     # _upload_to_repository()
 
     _setup_templates()
     _update_image()
     _setup_service()
+    click.echo('')
+    click.secho('Your experiment is available at: {}'.format(env.virtual_host), fg='green')
+
+
+@task
+def delete_instance(name):
+    """
+    The Fabric task to delete an instance
+    """
+    env.instance_name = name
+    env.app_path = '/testing/{app_name}'.format(**env)
+    env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
+    env.context = {
+        'APP_NAME': env.app_name,
+        'INSTANCE_NAME': env.instance_name,
+    }
+    _remove_path()
+    _remove_service()
+    run('docker container prune -f', quiet=env.quiet)
+    run('docker image prune -f', quiet=env.quiet)
+    containers = run('docker ps -a --filter name={app_name}-{instance_name} --format "{{{{.ID}}}}"'.format(**env), quiet=env.quiet)
+    if len(containers) > 0:
+        run('docker rm -f {app_name}-{instance_name}'.format(**env), quiet=env.quiet)
+
+    env.docker_image = env.docker_image_pattern % env.context
+    images = run('docker image ls {docker_image} -q'.format(**env), quiet=env.quiet)
+    if len(images) > 0:
+        run('docker image rm {docker_image}'.format(**env), quiet=env.quiet)
+
+
+@task
+def update_instance(name):
+    """
+    The Fabric task to update an instance
+    """
+    env.instance_name = name
+    env.app_path = '/testing/{app_name}'.format(**env)
+    env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
+    env.context = {
+        'APP_NAME': env.app_name,
+        'INSTANCE_NAME': env.instance_name,
+    }
+    _setup_path()
+    _checkout_code()
+
+    _app_build()
+    _container_build()
+    _setup_templates()
+    _update_image()
+    status = run('systemctl is-active {app_name}-{instance_name}'.format(**env), quiet=env.quiet)
+    if status == 'inactive':
+        sudo('systemctl start {app_name}-{instance_name}'.format(**env), quiet=env.quiet)
+    elif status == 'unknown':
+        click.ClickException(click.style('There was an issue restarting the service. The test server doesn\'t recognize it.'), fg='red')
 
 
 @click.command()
@@ -225,7 +276,26 @@ def create(ctx, branch, name):
     Create a test instance on the server
     """
     _setup_env_with_config(ctx.obj)
-
-    env.instance_name = name
-    env.branch_name = branch
     execute(create_instance, branch, name, hosts=ctx.obj.host)
+
+
+@click.command()
+@click.argument('name')
+@click.pass_context
+def delete(ctx, name):
+    """
+    Delete a test instance on the server
+    """
+    _setup_env_with_config(ctx.obj)
+    execute(delete_instance, name, hosts=ctx.obj.host)
+
+
+@click.command()
+@click.argument('name')
+@click.pass_context
+def update(ctx, name):
+    """
+    Delete a test instance on the server
+    """
+    _setup_env_with_config(ctx.obj)
+    execute(update_instance, name, hosts=ctx.obj.host)

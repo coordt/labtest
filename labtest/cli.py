@@ -10,16 +10,18 @@ import instance
 @click.option('--config', '-c', type=click.Path(exists=True), help='Alternate configuration file.')
 @click.option('--verbose', '-v', is_flag=True, default=False, help='Show verbose output.')
 @click.pass_context
-def cli(ctx, config, **kwargs):
+def main(ctx, config, **kwargs):
     """Console script for labtest"""
     cfg = get_config(config, **kwargs)
     if not cfg.validate():
         click.ClickException(cfg.validation_message())
     ctx.obj = cfg
 
-cli.add_command(instance.create)
-cli.add_command(check_config, 'check-config')
+main.add_command(instance.create)
+main.add_command(instance.update)
+main.add_command(instance.delete)
+main.add_command(check_config, 'check-config')
 
 if __name__ == "__main__":
     load_dotenv(find_dotenv())
-    cli(obj={}, auto_envvar_prefix='LABTEST')
+    main(obj={}, auto_envvar_prefix='LABTEST')
