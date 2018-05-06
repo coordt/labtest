@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from future.utils import iteritems
+from future import standard_library
 import click
 from fabric.api import env, sudo, run, task, execute, cd
 from fabric.contrib.files import upload_template, exists
 from fabric.operations import put
 from fabric.context_managers import settings
+standard_library.install_aliases()
 
 
 def _git_cmd(cmd):
@@ -81,14 +85,14 @@ def _put_docker_build_cmd():
     This wraps the `container_build_command` in a bash script
     """
     import os
-    from StringIO import StringIO
+    from io import StringIO
 
     base_file = os.path.join(os.path.dirname(__file__), 'templates', 'docker-build')
     contents = StringIO()
     contents.write(open(base_file, 'r').read())
     contents.write(env.container_build_command)
     with cd(env.instance_path):
-        result = put(local_path=contents, remote_path='docker-build', mode=0755)
+        result = put(local_path=contents, remote_path='docker-build', mode=0o755)
     if result.failed:
         click.ClickException('Failed to put the docker-build command on remote host.')
 
@@ -135,14 +139,14 @@ def _setup_templates():
     """
     Write the templates to the appropriate places
     """
-    from StringIO import StringIO
+    from io import StringIO
 
     env_dest = '{instance_path}/test.env'.format(**env)
     contents = StringIO()
     with cd(env.instance_path):
         env.virtual_host = _virtual_host_name()
         contents.write('VIRTUAL_HOST={}\n'.format(env.virtual_host))
-        for key, val in env.context.items():
+        for key, val in iteritems(env.context):
             contents.write('{}={}\n'.format(key, val))
         for item in env.environment:
             contents.write('{}\n'.format(item))
@@ -176,7 +180,7 @@ def _setup_env_with_config(config):
     """
     Add config keys to the env
     """
-    for key, val in config.config.items():
+    for key, val in iteritems(config.config):
         setattr(env, key, val)
     env.quiet = not config.verbose
 

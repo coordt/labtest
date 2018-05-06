@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-from configobj import Config
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from future.utils import iteritems
+from past.builtins import basestring
+from .configobj import Config
 import click
 
 
@@ -105,7 +109,7 @@ class LabTestConfig(Config):
         config = self.config
         missing_attrs = []
 
-        for option, dependency in self.dependencies.items():
+        for option, dependency in iteritems(self.dependencies):
             for dep_option in dependency.get(config[option], []):
                 if dep_option not in config:
                     default_func = getattr(self, 'get_default_{}'.format(dep_option), None)
@@ -132,7 +136,7 @@ def get_config(filepath='', **kwargs):
     else:
         config.parse_file(filepath)
 
-    for key, val in kwargs.items():
+    for key, val in iteritems(kwargs):
         setattr(config, key, val)
     return config
 
@@ -147,5 +151,5 @@ def check_config(ctx):
     click.echo(ctx.obj.validation_message())
     click.echo('')
     click.echo('Configuration:')
-    for key, val in ctx.obj.config.items():
+    for key, val in iteritems(ctx.obj.config):
         click.echo('  {}: {}'.format(key, val))

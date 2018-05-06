@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+from __future__ import absolute_import
 import click
-from config import get_config, check_config
+from .config import get_config, check_config
 from dotenv import load_dotenv, find_dotenv
-import instance
+from . import instance
 
 
 @click.group(invoke_without_command=True)

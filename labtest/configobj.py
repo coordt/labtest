@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from future import standard_library
+from future.utils import iteritems
+from builtins import object
+import click
+standard_library.install_aliases()
 
 
 class Config(object):
@@ -29,7 +35,7 @@ class Config(object):
         self._config = {}
         self._validation_errors = {}
 
-        for key, val in kwargs.items():
+        for key, val in iteritems(kwargs):
             setattr(self, key, val)
 
     @property
@@ -46,7 +52,7 @@ class Config(object):
                 default_func = getattr(self, 'get_default_{}'.format(item), None)
                 if default_func:
                     cfg[item] = default_func()
-        for key, val in self._config.items():
+        for key, val in iteritems(self._config):
             cfg[key] = getattr(self, key)
         return cfg
 
@@ -83,11 +89,11 @@ class Config(object):
         msg = []
         if self._validation_errors:
             if 'Missing Attributes' in self._validation_errors:
-                msg.append('The configuration is missing the following required attributes:')
+                msg.append(click.style('The configuration is missing the following required attributes:', fg='red'))
                 msg.append(', '.join(self._validation_errors['Missing Attributes']))
             return ' '.join(msg)
         else:
-            return 'The configuration is valid.'
+            return click.style('The configuration is valid.', fg='green')
 
     def __getattr__(self, name):
         """
@@ -165,11 +171,11 @@ class Config(object):
         Read a configuration from an INI file
         """
         import os
-        import ConfigParser
+        import configparser
 
         if not os.path.exists(filepath):
             raise IOError()
-        configparser = ConfigParser.ConfigParser()
+        configparser = configparser.ConfigParser()
         configparser.read([filepath])
         if self.namespace in configparser.sections():
             for key, val in configparser.items(self.namespace):
@@ -183,7 +189,7 @@ class Config(object):
         with open(filepath, 'r') as f:
             config = json.loads(f.read())
 
-        for key, val in config.get(self.namespace, {}).items():
+        for key, val in iteritems(config.get(self.namespace, {})):
             setattr(self, key, val)
 
     def read_yaml_config(self, filepath):
@@ -194,5 +200,5 @@ class Config(object):
         with open(filepath, 'r') as f:
             config = yaml.load(f)
 
-        for key, val in config.get(self.namespace, {}).items():
+        for key, val in iteritems(config.get(self.namespace, {})):
             setattr(self, key, val)
