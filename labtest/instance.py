@@ -137,17 +137,16 @@ def _setup_templates():
     """
     from StringIO import StringIO
 
-    env_dest = '/testing/{app_name}/{instance_name}/test.env'.format(**env)
+    env_dest = '{instance_path}/test.env'.format(**env)
     contents = StringIO()
-    if not exists(env_dest):
-        with cd(env.instance_path):
-            virtual_host = _virtual_host_name()
-            contents.write('VIRTUAL_HOST={}'.format(virtual_host))
-            for key, val in env.context:
-                contents.write('{}={}'.format(key, val))
-            for item in env.environment:
-                contents.write(item)
-            put(local_path=contents, remote_path=env_dest)
+    with cd(env.instance_path):
+        env.virtual_host = _virtual_host_name()
+        contents.write('VIRTUAL_HOST={}\n'.format(env.virtual_host))
+        for key, val in env.context.items():
+            contents.write('{}={}\n'.format(key, val))
+        for item in env.environment:
+            contents.write('{}\n'.format(item))
+        put(local_path=contents, remote_path=env_dest)
 
 
 def _update_image():
