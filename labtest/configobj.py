@@ -140,12 +140,15 @@ class Config(object):
         """
         Look for the default config path from the `default_config_files`.
         """
+        import os
         from dotenv import find_dotenv
 
         for option in self.default_config_files:
-            path = find_dotenv(option)
+            path = find_dotenv(option, usecwd=True)
             if path:
+                self.config_file_path = os.path.normpath(path)
                 self.parse_file(path)
+                break
 
     def parse_file(self, filepath):
         """
