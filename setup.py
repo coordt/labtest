@@ -3,16 +3,18 @@
 
 from setuptools import setup
 
+with open('requirements/prod.txt') as req_file:
+    requirements = [x for x in req_file.readlines() if x and x[0] not in ('-', '#')]
+
+with open('requirements/test.txt') as req_file:
+    test_requirements = [x for x in req_file.readlines() if x and x[0] not in ('-', '#')]
+
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [
-    'Click>=6.0',
-    # TODO: put package requirements here
-]
 
 test_requirements = [
     # TODO: put package test requirements here
@@ -20,7 +22,7 @@ test_requirements = [
 
 setup(
     name='labtest',
-    version='0.1.0',
+    version='0.2.0',
     description="Build an isolated test lab for running software in containers.",
     long_description=readme + '\n\n' + history,
     author="Corey Oordt",
