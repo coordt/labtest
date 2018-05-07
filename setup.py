@@ -43,7 +43,7 @@ setup(
     license="BSD license",
     zip_safe=False,
     keywords='labtest',
-    python_requires='2.7',
+    python_requires='==2.7.*',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
