@@ -2,9 +2,9 @@
 deploy:
   true:
     condition: $TOXENV == py27
-    repo: cityofboston/labtest
+    repo: CityOfBoston/labtest
     tags: true
-  distributions: sdidt bdist_wheel
+  distributions: sdist bdist_wheel
   password:
     secure: Gvug+kZqdVhCbGU9Hto3FNsSXRquJVBZkhz6RYUVpxzSDEVtT+NpT7puPZYny4qeL8LAcUtcwQEwy/TX/63A+b9OjYpM9/FHKI4PvW982xxeEQQSyzWVrK9sPT6oYthpfxSFgVg47M/h/a0eS7d3y9XQD6QnOaSt5i6i7EB3XUxAFliVbocPsog90s/PAS6yziQyVXJgTH5EBP42/IFjuMXCUhrVPjc12BElPYtiWGPM0rW2N/MutQZawg/qDMnAxyxjWzDK++6wTkqSZc7uGyuoCdDGYBQFQlU/50PFLW36kDcSjb0Hfgjza0tKwf96MTn+giGqjiU7+1HUzYjKAxM4hZ8Fiz/QtmUc4+zdGlBEqsx+9XUzVM0tAqU87FmjqL1C0UU+e15Z2Xi76Sp+GcUNw7oDO1RSp/gD47aNk+JHwyx7ajOTx0OrXLV5+90lDHblQx1aTidi/SeCrFDIgKfDgLcQF4KQmCy0nOTP05ON6CTiBN7fcd95ov0Gu6M2dN6+8WW/LfNEHGuQjwTi5NGun8gE2gOXuUxSMe5wS4wsc8Xkvjv+NicxKaPul8mjJ6Zck5oRv4RGh1RALYMR04JKFUNBo4DIZhTGDPUA8/TwUwLp0RaDJxN/sU+WHspWPGjGtRCsncQqRVxzmbJOOKBFhqckgF2HpZjrrZsuceQ=
   provider: pypi
