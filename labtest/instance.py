@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from future.utils import iteritems
 from future import standard_library
+from builtins import str
 import click
 from fabric.api import env, sudo, run, task, execute, cd
 from fabric.contrib.files import upload_template, exists
@@ -88,8 +89,8 @@ def _put_docker_build_cmd():
 
     base_file = os.path.join(os.path.dirname(__file__), 'templates', 'docker-build')
     contents = StringIO()
-    contents.write(open(base_file, 'r').read())
-    contents.write(env.container_build_command)
+    contents.write(str(open(base_file, 'r').read()))
+    contents.write(str(env.container_build_command))
     with cd(env.instance_path):
         result = put(local_path=contents, remote_path='docker-build', mode=0o755)
     if result.failed:
@@ -140,15 +141,15 @@ def _setup_templates():
     """
     from io import StringIO
 
-    env_dest = '{instance_path}/test.env'.format(**env)
+    env_dest = u'{instance_path}/test.env'.format(**env)
     contents = StringIO()
     with cd(env.instance_path):
         env.virtual_host = _virtual_host_name()
-        contents.write('VIRTUAL_HOST={}\n'.format(env.virtual_host))
+        contents.write(u'VIRTUAL_HOST={}\n'.format(env.virtual_host))
         for key, val in iteritems(env.context):
-            contents.write('{}={}\n'.format(key, val))
+            contents.write(u'{}={}\n'.format(key, val))
         for item in env.environment:
-            contents.write('{}\n'.format(item))
+            contents.write(u'{}\n'.format(item))
         put(local_path=contents, remote_path=env_dest)
 
 
