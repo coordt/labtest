@@ -24,81 +24,42 @@ Lab Test
 Overview
 --------
 
-Easily create a semi-public, semi-independent deployment of a version of a web
-site or app.
+In short, LabTest deploys branch ``foo`` onto a server that others can reach at ``foo.test.example.com``\ . This deployment is called an *experiment.*
 
-**Semi-public.** Allow access via a URL and user credentials. It would be available
-from the public internet, but not to the general public.
+There are three parts to LabTest: the server architecture (or *laboratory),* the command line client, and the configuration in the code repository.
 
-**Semi-independent.** While the code will be independent, some of the other parts
-of the infrastructure will be shared. The amount of sharing depends on needs.
+**The laboratory.** This is the server environment that you control. LabTest has some templates to help you get started, but ultimately the laboratory's environment is under your control. All LabTest needs is SSH access and Docker.
 
-**Version.** Typically this is a branch of development.
+**The configuration.** The configuration instructs LabTest how to publish experiments. It sits in the code repository so any developer who works on the code can publish new experiments.
 
-In short, it deploys branch `foo` onto a server that others can reach at `foo.test.example.com`.
-
-
+**The client.** The client is a command line tool that uses SSH and the configuration to create, list, update, and delete experiments in the laboratory.
 
 Goals
 -----
 
-* Asynchronous evaluation of tickets
-* Quick evaluation of new ideas
-* Open evaluation to a greater audience
+* Easy for developers to use
+* Easy to administrate
+* Flexible enough to conform to different team methodologies
 
+**Easy for developers to use.** There are several parts to this. It should be require as few steps as possible to:
 
+    - onboard a new developer
+    - create, update, and delete experiments
+    - convert a code base to use LabTest
 
-* To make the best test instances, you need:
+**Easy to administrate.** LabTest only requires SSH access to the environment. Anything else you want to do is up to you.
 
-    - A Machine User for your VCS (for private repos)
-    - A Test server configuration in AWS
-    - A `Dockerfile` that works
-    - A script to build the container
-    - A script to run commands in the container
-    - Environment configuration capability
-    - Access to a database backup, if necessary
+**Flexible.** No two teams are alike. LabTest embraces this diversity by providing good defaults (for ease of use) with the ability to customize and extend (to make it your own).
 
-``labtest create <branchname> [--name <name>]``
+What can you do with it?
+------------------------
 
-``labtest update <instancename>``
+**Asynchronous evaluation of tickets.** A developer can complete three tickets, in three different branches, and publish the three experiments for review by different people. As the tickets are completed, the branches can be merged and the experiments deleted in any order.
 
-``labtest remove <instancename>``
+**Quick evaluation of new ideas.** Sometimes you just want to try something. LabTest makes it easy to demonstrate the idea.
 
-``labtest stop [<instancename>]``
+**Open evaluation to a greater audience.** When the experiments are accessible from the internet, people don't have to look over the developer's shoulder to see the progress.
 
-``labtest start [<instancename>]``
-
-``labtest setsecret KEY=value``
-
-
-
-
-Two phases: Bulid phase and install phase
-
-    - Build phase
-        - Git checkout of the repo
-        - App build phase:
-            - This phase does whatever is necessary to build the application before the docker container is built
-            - Runs build commands in a specified docker container
-            - The container maps a specified directory on the container to the git checkout
-        - Container build phase
-            - Builds using a specified Docker file and any other build params
-            - Tags and uploads the image to repository
-    - Install phase
-        - setup service
-        - setup environment vars
-        - other parts of the docker stuff
-
-
-
-- Specify a docker repo/image to use to build
-- Code is checked out on main server, mapped to docker container
-- Follow travis' or shippable's method for install and build
-
-Features
---------
-
-* TODO
 
 Credits
 ---------
