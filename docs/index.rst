@@ -1,18 +1,17 @@
-==================
-Lab Test |version|
-==================
+.. image::  /images/labtestlogo.svg
+    :alt: Lab Test
+    :width:     400
 
-Contents:
 
 .. toctree::
    :maxdepth: 2
 
    readme
-   tutorial
-   getting_started
    installation
+   getting_started
+   builtin_build_process
+   tutorial
    configuration
-   usage
    admin/index
    modules
    contributing

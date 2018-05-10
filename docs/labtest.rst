@@ -43,6 +43,14 @@ labtest.instance module
     :undoc-members:
     :show-inheritance:
 
+labtest.secrets module
+----------------------
+
+.. automodule:: labtest.secrets
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

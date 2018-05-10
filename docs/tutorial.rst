@@ -4,6 +4,7 @@ Tutorial: Converting a project to use Lab Test
 
 We are going to convert a Vue.js component for use with LabTest. This tutorial assumes that the test environment or laboratory is already set up, and you have :ref:`set up your local machine <setting_up_your_local_machine>`.
 
+.. _tutorial_containerizing:
 
 Containerizing
 ==============

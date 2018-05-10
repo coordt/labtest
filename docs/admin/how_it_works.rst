@@ -4,22 +4,22 @@ How it Works
 
 There are two parts to "how it works:"
 
-- **The Environment, or the laboratory.** This is the low-level setup that isolates and runs the experiments.
+- **The Laboratory.** This is the server setup that isolates and runs the experiments.
 - **Experiments.** These are semi-public, semi-independent deployments of a version of a web site or app.
 
 
-The Environment
----------------
+The Laboratory
+--------------
 
-The test server environment:
+The laboratory environment:
 
 - Should be isolated from other environments (e.g. production)
 - Should be easily rebuildable from scratch
 - Should have access to test versions of all services you may need
 - Should be accessible by developers via SSH
 
-Isolated Environment
-~~~~~~~~~~~~~~~~~~~~
+Isolated Laboratory
+~~~~~~~~~~~~~~~~~~~
 
 Because this is a test environment, things will go wrong. You do not want an accident to harm another environment. This is also handy for security reasons. Since the developers will have SSH access to the test server, you want to limit the amount of damage a hacker could do if you are compromised.
 
@@ -38,8 +38,10 @@ Accessible by developers via SSH
 
 The primary reason is that it is via SSH that the commands will communicate to set up each test instance. The other is that there are occasions when a developer having access to a production-like environment is advantageous.
 
-The parts
-~~~~~~~~~
+Example setup
+~~~~~~~~~~~~~
+
+This setup shows an example setup created through :ref:`setting_up_the_laboratory`\ .
 
 .. image:: /images/test-infrastructure.png
 
@@ -83,6 +85,8 @@ When the Docker container for an experiment runs, it can tell nginx proxy to rou
 .. _test server template: https://github.com/CityOfBoston/labtest/blob/master/infrastructure/cloudformation/testserver.yaml
 
 
+.. _how_it_works_experiments:
+
 Experiments
 -----------
 
@@ -100,7 +104,7 @@ Typically the instance name is the same as the branch name, but they don't have 
 
 **Create experiment space.** The step creates a space to store files it might need. The space is at ``/testing/<app name>/<instance name>``\ .
 
-**Trigger build.** The result of this step is a compiled Docker image. Test Lab has a :ref:`default process <default-build-process>`\ , or you can use your own existing process that generates the image.
+**Trigger build.** The result of this step is a compiled Docker image. Test Lab has a :ref:`built-in process <builtin_build_process>`\ , or you can use your own existing process that generates the image.
 
 **Create container from image.** There are two parts to this: creating an environment file and creating the container. The environment file is automatically generated from the values in :ref:`environment_config_option`, plus a few extras:
 
@@ -116,15 +120,3 @@ The container is created and named using the `docker create`_ command. This allo
 **Create OS Service.** This step creates Systemd services to start and stop the containers. It makes sure they are started in case of a reboot of the machine as well.
 
 .. _docker create: https://docs.docker.com/engine/reference/commandline/create/
-
-
-.. _default-build-process:
-
-Default build process
-~~~~~~~~~~~~~~~~~~~~~
-
-**Check out code.**
-
-**Build application.**
-
-**Build Docker image.**

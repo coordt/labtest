@@ -33,13 +33,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/coordt/labtest
+    $ git clone git://github.com/CityofBoston/labtest
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/coordt/labtest/tarball/master
+    $ curl  -OL https://github.com/CityofBoston/labtest/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -48,5 +48,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/coordt/labtest
-.. _tarball: https://github.com/coordt/labtest/tarball/master
+.. _Github repo: https://github.com/CityofBoston/labtest
+.. _tarball: https://github.com/CityofBoston/labtest/tarball/master
