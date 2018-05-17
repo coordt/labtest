@@ -2,11 +2,12 @@
 import os
 from io import BytesIO
 from fabric.api import env, run, sudo
-from fabric.contrib.files import upload_template, exists
+from fabric.contrib.files import exists
 from fabric.operations import put, get
 from fabric.context_managers import settings, hide
 import json
 import click
+from labtest import services
 
 
 def _get_initial_data_source(path):
@@ -147,45 +148,6 @@ def _delete_container(config):
         run('docker rm -f {service_name}'.format(**config), quiet=env.quiet)
 
 
-def _setup_service(config):
-    """
-    Set up the service
-    """
-    context = {'SERVICE_NAME': config['name']}
-
-    systemd_template = os.path.join(os.path.dirname(__file__), 'templates', 'systemd-backing.conf.template')
-    systemd_tmp_dest = '/tmp/{service_name}.service'.format(**config)
-    systemd_dest = '/etc/systemd/system/{service_name}.service'.format(**config)
-    if not exists(systemd_dest):
-        click.echo('  Creating the OS service: {service_name}'.format(**config))
-        upload_template(systemd_template, systemd_tmp_dest, context)
-        sudo('mv {} {}'.format(systemd_tmp_dest, systemd_dest), quiet=env.quiet)
-        sudo('systemctl enable {service_name}.service'.format(**config), quiet=env.quiet)
-        click.echo('  Starting the OS service: {service_name}'.format(**config))
-        sudo('systemctl start {service_name}.service'.format(**config), quiet=env.quiet)
-
-
-def _start_service(config):
-    """
-    Make sure the service is running
-    """
-    containers = run('docker ps --filter name={service_name} --filter status=running --format "{{{{.ID}}}}"'.format(**config), quiet=env.quiet)
-    if len(containers) == 0:
-        click.echo('  Starting the OS service: {service_name}'.format(**config))
-        sudo('systemctl start {service_name}.service'.format(**config), quiet=env.quiet)
-
-
-def _delete_service(config):
-    """
-    Remove the service and clean up
-    """
-    systemd_dest = '/etc/systemd/system/{service_name}.service'.format(**config)
-    if exists(systemd_dest):
-        click.echo('  Deleting the OS service: {service_name}'.format(**config))
-        sudo('systemctl stop {service_name}.service'.format(**config), quiet=env.quiet)
-        sudo('systemctl disable {service_name}.service'.format(**config), quiet=env.quiet)
-
-
 def _write_config(config, config_path):
     """
     Write a JSON file to the test server to make it easy to see if things have changed
@@ -272,13 +234,15 @@ def create(config, name):
     create_service = _has_config_changed(service_config)
 
     if create_service:
-        _write_config(service_config, service_config['config_path'])
         click.echo('  Updating docker image "{}" for backing service.'.format(service_config['image']))
         run('docker pull {}'.format(service_config['image']), quiet=env.quiet)  # To make sure it is ready to go
         _setup_volume(service_config)
         _setup_container(service_config)
-        _setup_service(service_config)
-        _start_service(service_config)
+
+        systemd_template = os.path.join(os.path.dirname(__file__), 'templates', 'systemd-backing.conf.template')
+        services.setup_service(service_config['service_name'], systemd_template, {'SERVICE_NAME': service_config['service_name']}, env.quiet)
+
+        _write_config(service_config, service_config['config_path'])
 
     return {
         'links': ['{service_name}:{name}'.format(**service_config)]
@@ -300,7 +264,7 @@ def destroy(config, name):
         run('rm -R {}'.format(service_config['environment_file_path']), quiet=env.quiet)
 
     _delete_config(service_config['config_path'])
-    _delete_service(service_config)
+    services.delete_service(service_config['service_name'], env.quiet)
     _delete_container(service_config)
     _delete_volume(service_config)
     run('docker prune volume -f', quiet=env.quiet)

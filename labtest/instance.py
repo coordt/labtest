@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
+import os
+
 from future.utils import iteritems
 from future import standard_library
 from builtins import str
 import click
 from fabric.api import env, sudo, run, task, execute, cd
-from fabric.contrib.files import upload_template, exists
+from fabric.contrib.files import exists
 from fabric.operations import put
 from fabric.context_managers import settings, hide
+from . import services
+
 standard_library.install_aliases()
 
 
@@ -51,8 +55,6 @@ def _checkout_code():
     """
     Check out the repository into the proper place, if it hasn't already been done
     """
-    import os
-
     env.code_path = os.path.join(env.instance_path, 'code')
     if not exists(env.code_path):
         click.echo('Checking out code from: {code_repo_url}'.format(**env))
@@ -60,7 +62,8 @@ def _checkout_code():
             # All git commands must use the ec2-user since we have added credentials
             # and a key for the service.
             _git_cmd('git clone {code_repo_url} code --branch {branch_name} --depth 1')
-            _git_cmd('chgrp -R docker {instance_path}; chmod -R g+w {instance_path}')
+            with settings(warn_only=True):
+                _git_cmd('chgrp -R docker {instance_path}; chmod -R g+w {instance_path}')
     else:
         click.echo('Fetching most recent code from: {code_repo_url}'.format(**env))
         with cd(env.code_path):
@@ -114,36 +117,6 @@ def _image_build():
     click.echo('Building the Docker image.')
     with cd(env.instance_path):
         run('./docker-build -a {app_name} -i {instance_name}'.format(**env), quiet=env.quiet)
-
-
-def _setup_service():
-    """
-    Set up the service
-    """
-    import os
-
-    systemd_template = os.path.join(os.path.dirname(__file__), 'templates', 'systemd-test.conf.template')
-    systemd_tmp_dest = '/tmp/{app_name}-{instance_name}.service'.format(**env)
-    systemd_dest = '/etc/systemd/system/{app_name}-{instance_name}.service'.format(**env)
-    if not exists(systemd_dest):
-        click.echo('Creating the OS service.')
-        with hide('running'):
-            upload_template(systemd_template, systemd_tmp_dest, env.context)
-        sudo('mv {} {}'.format(systemd_tmp_dest, systemd_dest), quiet=env.quiet)
-        sudo('systemctl enable {app_name}-{instance_name}.service'.format(**env), quiet=env.quiet)
-        sudo('systemctl start {app_name}-{instance_name}.service'.format(**env), quiet=env.quiet)
-
-
-def _remove_service():
-    """
-    Stop the service, and remove its configuration
-    """
-    systemd_dest = '/etc/systemd/system/{app_name}-{instance_name}.service'.format(**env)
-    if exists(systemd_dest):
-        click.echo('Removing the OS service.')
-        sudo('systemctl disable {app_name}-{instance_name}.service'.format(**env), quiet=env.quiet)
-        sudo('systemctl stop {app_name}-{instance_name}.service'.format(**env), quiet=env.quiet)
-        sudo('rm {}'.format(systemd_dest), quiet=env.quiet)
 
 
 def _setup_backing_services():
@@ -325,7 +298,9 @@ def create_instance(branch, name=''):
 
     _setup_templates()
     _update_container()
-    _setup_service()
+
+    systemd_template = os.path.join(os.path.dirname(__file__), 'templates', 'systemd-test.conf.template')
+    services.setup_service(env.service_name, systemd_template, env.context, env.quiet)
     click.echo('')
     click.secho('Your experiment is available at: {}'.format(env.virtual_host), fg='green')
 
@@ -388,11 +363,7 @@ def update_instance(name):
     _image_build()
     _setup_templates()
     _update_container()
-    status = run('systemctl is-active {app_name}-{instance_name}'.format(**env), quiet=env.quiet)
-    if status == 'inactive':
-        sudo('systemctl start {app_name}-{instance_name}'.format(**env), quiet=env.quiet)
-    elif status == 'unknown':
-        click.ClickException(click.style('There was an issue restarting the service. The test server doesn\'t recognize it.'), fg='red')
+    services.start_service('{app_name}-{instance_name}'.format(**env), env.quiet)
 
 
 @task
