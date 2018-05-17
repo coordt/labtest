@@ -140,6 +140,39 @@ def get_config(filepath='', **kwargs):
     return config
 
 
+def _format_config(val, key='', indent=0, indent_amt=2):
+    """
+    recursive dict/list formatter
+    """
+    spaces = ' ' * indent * indent_amt
+    if indent > 10:
+        click.ClickException('WHATSGOINGON!')
+    if isinstance(val, (list, tuple)):
+        if key:
+            click.echo(spaces, nl=False)
+            click.echo(click.style('{}:'.format(key), bold=True))
+            indent += 1
+        for item in val:
+            _format_config(item, '', indent, indent_amt)
+        if key:
+            indent -= 1
+    elif isinstance(val, dict):
+        if key:
+            click.echo(spaces, nl=False)
+            click.echo(click.style('{}:'.format(key), bold=True))
+            indent += 1
+        for subkey, subval in iteritems(val):
+            # indent += 1
+            _format_config(subval, subkey, indent, indent_amt)
+    else:
+        if key:
+            click.echo(spaces, nl=False)
+            click.echo(click.style('{}:'.format(key), bold=True), nl=False)
+            click.echo(' {}'.format(val))
+        else:
+            click.echo('{}{}'.format(spaces, val))
+
+
 @click.command()
 @click.pass_context
 def check_config(ctx):
@@ -149,6 +182,4 @@ def check_config(ctx):
     ctx.obj.validate()
     click.echo(ctx.obj.validation_message())
     click.echo('')
-    click.echo('Configuration:')
-    for key, val in iteritems(ctx.obj.config):
-        click.echo('  {}: {}'.format(key, val))
+    _format_config(ctx.obj.config, 'Configuration')
