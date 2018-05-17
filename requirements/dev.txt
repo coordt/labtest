@@ -6,3 +6,4 @@ flake8
 Sphinx
 cryptography
 sphinx-readable-theme
+sphinxcontrib-fulltoc

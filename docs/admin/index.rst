@@ -11,5 +11,4 @@ Contents:
    setting_up_the_lab
    setting_up_users
    setting_up_the_builtin_build
-   backing_services
    defaults_and_state
