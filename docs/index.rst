@@ -10,10 +10,11 @@
    installation
    getting_started
    builtin_build_process
+   backing_services/index
    tutorial
    configuration
    admin/index
-   modules
+   api/modules
    contributing
    authors
    history
