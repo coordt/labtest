@@ -179,6 +179,28 @@ def _delete_backing_services():
         service.destroy(config, service_name)
 
 
+def _setup_network():
+    """
+    Create a network for this experiment, if necessary
+    """
+    networks = run('docker network ls --filter name={network_name} --format "{{{{.ID}}}}"'.format(**env))
+    if len(networks) == 0:
+        click.echo('Setting up networking.')
+        run('docker network create --driver bridge {network_name}'.format(**env), quiet=env.quiet)
+        run('docker network connect {network_name} nginx_proxy'.format(**env), quiet=env.quiet)
+
+
+def _delete_network():
+    """
+    Delete the network for this experiment, if necessary
+    """
+    networks = run('docker network ls --filter name={network_name} --format "{{{{.ID}}}}"'.format(**env))
+    if len(networks) != 0:
+        click.echo('Removing network.')
+        run('docker network disconnect {network_name} nginx_proxy'.format(**env), quiet=env.quiet)
+        run('docker network rm {network_name}'.format(**env), quiet=env.quiet)
+
+
 def _setup_templates():
     """
     Write the templates to the appropriate places
@@ -205,36 +227,33 @@ def _update_container():
     """
     Pull down the latest version of the image from the repository
     """
-    # run("eval $(aws ecr get-login --no-include-email --region us-east-1) && "
-    #     "docker pull {repository_url}:latest".format(**env))
-
     # Delete the container if it exists
     cmd = [
         'docker ps -a',
-        '--filter name={app_name}-{instance_name}',
-        '--filter ancestor={app_name}-{instance_name}',
+        '--filter name={service_name}',
+        '--filter ancestor={docker_image}',
         '--format "{{{{.ID}}}}"'
     ]
     containers = run(' '.join(cmd).format(**env), quiet=env.quiet)
     if len(containers) > 0:
         click.echo('Removing the existing container.')
         with settings(warn_only=True):
-            sudo('systemctl stop {app_name}-{instance_name}'.format(**env), quiet=env.quiet)
-        run('docker rm -f {app_name}-{instance_name}'.format(**env), quiet=env.quiet)
+            sudo('systemctl stop {service_name}'.format(**env), quiet=env.quiet)
+        run('docker rm -f {service_name}'.format(**env), quiet=env.quiet)
 
-    env.docker_image = env.docker_image_pattern % env.context
     cmd = [
         'docker create',
         '--env-file {instance_path}/test.env',
-        '--name {app_name}-{instance_name}',
+        '--name {service_name}',
+        '--network {network_name}',
     ]
 
     # Note that the enviornment variables were added in _setup_templates
     for host in env.backing_service_configs.get('hosts', []):
         cmd.append('--add-host {}'.format(host))
 
-    for link in env.backing_service_configs.get('links', []):
-        cmd.append('--link {}'.format(link))
+    # for link in env.backing_service_configs.get('links', []):
+    #     cmd.append('--link {}'.format(link))
 
     cmd.append('{docker_image}')
 
@@ -283,16 +302,20 @@ def create_instance(branch, name=''):
     env.branch_name = branch
     env.app_path = '/testing/{app_name}'.format(**env)
     env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
+    env.service_name = '{app_name}-{instance_name}'.format(**env)
+    env.network_name = '{service_name}-net'.format(**env)
     env.context = {
         'APP_NAME': env.app_name,
         'INSTANCE_NAME': env.instance_name,
         'BRANCH_NAME': env.branch_name
     }
+    env.docker_image = env.docker_image_pattern % env.context
     _setup_path()
     _checkout_code()
 
     _app_build()
     _image_build()
+    _setup_network()
 
     # TODO: How to determine if we need to deal with pulling from the repository
     # env.repository_url = aws._get_or_create_repository()
@@ -315,24 +338,27 @@ def delete_instance(name):
     env.instance_name = name
     env.app_path = '/testing/{app_name}'.format(**env)
     env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
+    env.service_name = '{app_name}-{instance_name}'.format(**env)
+    env.network_name = '{service_name}-net'.format(**env)
     env.context = {
         'APP_NAME': env.app_name,
         'INSTANCE_NAME': env.instance_name,
     }
+    env.docker_image = env.docker_image_pattern % env.context
     _remove_path()
-    _remove_service()
+    services.delete_service(env.service_name, env.quiet)
     run('docker container prune -f', quiet=env.quiet)
-    run('docker image prune -f', quiet=env.quiet)
+    run('docker volume prune -f', quiet=env.quiet)
 
     cmd = [
         'docker ps -a',
-        '--filter name={app_name}-{instance_name}',
-        '--filter ancestor={app_name}-{instance_name}',
+        '--filter name={service_name}',
+        '--filter ancestor={docker_image}',
         '--format "{{{{.ID}}}}"'
     ]
     containers = run(' '.join(cmd).format(**env), quiet=env.quiet)
     if len(containers) > 0:
-        run('docker rm -f {app_name}-{instance_name}'.format(**env), quiet=env.quiet)
+        run('docker rm -f {service_name}'.format(**env), quiet=env.quiet)
 
     env.docker_image = env.docker_image_pattern % env.context
     images = run('docker image ls {docker_image} -q'.format(**env), quiet=env.quiet)
@@ -340,6 +366,7 @@ def delete_instance(name):
         run('docker image rm {docker_image}'.format(**env), quiet=env.quiet)
 
     _delete_backing_services()
+    _delete_network()
 
 
 @task

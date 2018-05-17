@@ -109,6 +109,9 @@ def _setup_container(config):
     cmd = [
         'docker create',
         '--name {service_name}',
+        '--network {network_name}',
+        '--net-alias {name}',
+        '-v {volume_name}:/var/lib/mysql',
     ]
 
     if config['environment']:
@@ -119,7 +122,6 @@ def _setup_container(config):
         config['data_source_filename'] = os.path.basename(config['initial_data_source'])
         cmd.append('-v {initial_data_source}:/docker-entrypoint-initdb.d/{data_source_filename}')
 
-    cmd.append('-v {volume_name}:/var/lib/mysql'.format(**config))
     cmd.append('{image}')
     if 'commands' in config:
         cmd.extend(config['commands'])
@@ -240,6 +242,7 @@ def _get_service_config(config, name):
     service_config['environment_file_path'] = '{instance_path}/{service_name}.env'.format(**service_config)
     service_config['volume_name'] = '{service_name}-data'.format(**service_config)
     service_config['config_path'] = '{instance_path}/{service_name}.conf.json'.format(**service_config)
+    service_config['network_name'] = '{app_name}-{instance_name}-net'.format(name=name, **env)
 
     return service_config
 
