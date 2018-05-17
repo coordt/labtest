@@ -23,6 +23,7 @@ class LabTestConfig(Config):
         'host_name_pattern',
         'environment',
         'docker_image_pattern',
+        'services',
     ]
     dependencies = {
         'build_provider': {
@@ -32,6 +33,12 @@ class LabTestConfig(Config):
             ]
         }
     }
+
+    def get_default_services(self):
+        """
+        The services the experiment requires. Defaults to an empty dict
+        """
+        return {}
 
     def get_default_build_provider(self):
         """
@@ -81,6 +88,18 @@ class LabTestConfig(Config):
         Return an empty list as the default environment
         """
         return []
+
+    def get_default_app_build_image(self):
+        """
+        Make the app build image config optional
+        """
+        return ''
+
+    def get_default_app_build_command(self):
+        """
+        Make the app build image command optional
+        """
+        return ''
 
     def get_default_container_provider(self):
         """
