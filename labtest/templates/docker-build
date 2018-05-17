@@ -56,4 +56,5 @@ echo "  INSTANCE_NAME: $INSTANCE_NAME"
 echo "  BRANCH_NAME: $BRANCH_NAME"
 echo "  RELEASE: $RELEASE"
 
+cd code
 # Docker command automatically inserted here
