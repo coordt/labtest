@@ -23,6 +23,7 @@ class LabTestConfig(Config):
         'host_name_pattern',
         'environment',
         'docker_image_pattern',
+        'services',
     ]
     dependencies = {
         'build_provider': {
@@ -32,6 +33,12 @@ class LabTestConfig(Config):
             ]
         }
     }
+
+    def get_default_services(self):
+        """
+        The services the experiment requires. Defaults to an empty dict
+        """
+        return {}
 
     def get_default_build_provider(self):
         """
@@ -81,6 +88,18 @@ class LabTestConfig(Config):
         Return an empty list as the default environment
         """
         return []
+
+    def get_default_app_build_image(self):
+        """
+        Make the app build image config optional
+        """
+        return ''
+
+    def get_default_app_build_command(self):
+        """
+        Make the app build image command optional
+        """
+        return ''
 
     def get_default_container_provider(self):
         """
@@ -140,6 +159,39 @@ def get_config(filepath='', **kwargs):
     return config
 
 
+def _format_config(val, key='', indent=0, indent_amt=2):
+    """
+    recursive dict/list formatter
+    """
+    spaces = ' ' * indent * indent_amt
+    if indent > 10:
+        click.ClickException('WHATSGOINGON!')
+    if isinstance(val, (list, tuple)):
+        if key:
+            click.echo(spaces, nl=False)
+            click.echo(click.style('{}:'.format(key), bold=True))
+            indent += 1
+        for item in val:
+            _format_config(item, '', indent, indent_amt)
+        if key:
+            indent -= 1
+    elif isinstance(val, dict):
+        if key:
+            click.echo(spaces, nl=False)
+            click.echo(click.style('{}:'.format(key), bold=True))
+            indent += 1
+        for subkey, subval in iteritems(val):
+            # indent += 1
+            _format_config(subval, subkey, indent, indent_amt)
+    else:
+        if key:
+            click.echo(spaces, nl=False)
+            click.echo(click.style('{}:'.format(key), bold=True), nl=False)
+            click.echo(' {}'.format(val))
+        else:
+            click.echo('{}{}'.format(spaces, val))
+
+
 @click.command()
 @click.pass_context
 def check_config(ctx):
@@ -149,6 +201,4 @@ def check_config(ctx):
     ctx.obj.validate()
     click.echo(ctx.obj.validation_message())
     click.echo('')
-    click.echo('Configuration:')
-    for key, val in iteritems(ctx.obj.config):
-        click.echo('  {}: {}'.format(key, val))
+    _format_config(ctx.obj.config, 'Configuration')

@@ -28,20 +28,20 @@ Configure SSH
 
 Let's set up our SSH configuration. We need a few bits of information:
 
-* SSH bastion DNS name or IP address
-* The test server IP address (it is a non-routable IP address, like 10.x.x.x)
-* Your user name. If your username contains ``+``\ , ``=``\ , ``,``\ , or ``@`` you need to convert a few characters:
+- SSH bastion DNS name or IP address
+- The test server IP address (it is a non-routable IP address, like 10.x.x.x)
+- Your user name. If your username contains ``+``\ , ``=``\ , ``,``\ , or ``@`` you need to convert a few characters:
 
-    - ``+`` to ``.plus.``
-    - ``=`` to ``.equal.``
-    - ``,`` to ``.comma.``
-    - ``@`` to ``.at.``
+  - ``+`` to ``.plus.``
+  - ``=`` to ``.equal.``
+  - ``,`` to ``.comma.``
+  - ``@`` to ``.at.``
 
 For this example:
 
-* **SSH bastion IP address:** ``111.222.111.222``
-* **Test server IP address:** ``10.20.3.3``
-* **User name:** ``corey.oordt.at.boston.gov`` (converted from ``corey.oordt@boston.gov``\ )
+- **SSH bastion IP address:** ``111.222.111.222``
+- **Test server IP address:** ``10.20.3.3``
+- **User name:** ``corey.oordt.at.boston.gov`` (converted from ``corey.oordt@boston.gov``\ )
 
 Now we add some lines to our ``~/.ssh/config`` file:
 

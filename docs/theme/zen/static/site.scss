@@ -1,0 +1,232 @@
+// To compile
+// sass static/site.scss static/site.css --load-path node_modules
+
+// Spacing
+$global-font-size: 17px;
+$global-line-height: 1.52941176;
+$global-xxlarge-font-size: 3.3529412rem;
+$global-xlarge-font-size: 2.2352941rem;
+$global-large-font-size: 1.5294118rem;
+$global-medium-font-size: 1rem;
+$global-small-font-size: 0.8rem;
+$base-code-font-size: 0.999em;
+$base-code-line-height: $global-line-height - 0.001;
+$base-pre-font-size: $base-code-font-size;
+$base-pre-line-height: $base-code-line-height;
+$base-blockquote-line-height: 1.52941176;
+
+$base-h1-line-height: 4.5882353rem;
+$base-h2-line-height: 3.0588235rem;
+$base-h3-line-height: 1.5294118rem;
+$base-h4-line-height: 1.5294118rem;
+$base-h5-line-height: 1.5294118rem;
+$base-h6-line-height: 1.5294118rem;
+
+$global-margin: $global-font-size * $global-line-height;
+$global-medium-margin: $global-margin * 2;
+$global-small-margin: $global-margin / 2;
+$global-large-margin: $global-margin * 3;
+$global-small-gutter: $global-small-margin;
+$table-cell-padding-vertical: $global-small-margin;
+$table-cell-padding-horizontal: $global-small-margin;
+$base-list-padding-left: $global-margin;
+$list-bullet-margin-right: 0em;
+$list-nested-padding-left: 0;
+$list-margin-top: 0;
+$nav-item-padding-horizontal: $global-small-margin;
+
+// Colors
+$global-color: #222;
+$global-link-color: #0070c9;
+$global-link-hover-color:#0070c9;
+$base-code-color: $global-color;
+$base-em-color: $global-color;
+$global-warning-background: #fee450;
+
+$breadcrumb-divider: ' ';
+$breadcrumb-divider-margin-horizontal: 8px;
+
+$chevron-up: "data:image/svg+xml;charset=UTF-8,%3Csvg width='60' height='34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M56.561 33.39L30 5.879 3.439 33.39.561 30.61 30 .121 59.439 30.61l-2.878 2.78' fill='#000' /%3E%3C/svg%3E";
+$chevron-down: "data:image/svg+xml;charset=UTF-8,%3Csvg width='60' height='34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 33.879L.561 3.39 3.439.61 30 28.121 56.561.61l2.878 2.78L30 33.879' fill='#000'/%3E%3C/svg%3E";
+$chevron-left: "data:image/svg+xml;charset=UTF-8,%3Csvg width='34' height='59' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30.611 58.438L.093 28.974 30.637.536l2.726 2.928L5.907 29.026l27.482 26.535-2.778 2.877' fill='#000'/%3E%3C/svg%3E";
+$chevron-right: "data:image/svg+xml;charset=UTF-8,%3Csvg width='34' height='59' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2.889 58.438L.111 55.561l27.482-26.535L.137 3.464 2.863.536l30.544 28.438L2.889 58.438' fill='#000'/%3E%3C/svg%3E";
+
+$base-code-font-family: 'Fira Mono', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+
+
+@import "uikit/src/scss/variables.scss";
+@import "uikit/src/scss/mixins.scss";
+
+@mixin hook-base-pre() {
+    margin-top: $global-margin;
+}
+@mixin hook-base-h1() {
+    font-weight: bolder;
+    margin-top: 1.5294118rem;
+    margin-bottom: 3.0588236rem;
+}
+@mixin hook-base-h2() {
+    margin-top: 1.5294118rem;
+    margin-bottom: 0.7647059rem;
+}
+@mixin hook-base-h3() {
+    margin-top: 1.5294118rem;
+    margin-bottom: 0rem;
+}
+@mixin hook-base-h4() {
+    margin-top: 1.5294118rem;
+    margin-bottom: 0rem;
+}
+@mixin hook-base-h5() {
+    margin-top: 1.5294118rem;
+    margin-bottom: 0rem;
+}
+@mixin hook-base-h6() {
+    margin-top: 1.5294118rem;
+    margin-bottom: 0rem;
+}
+@mixin hook-base-code() {
+    color: inherit;
+}
+@mixin hook-nav-default() {
+    font-size: $global-small-font-size;
+    line-height: 1.911764706;
+}
+@mixin hook-breadcrumb-divider() {
+    @include svg-fill($chevron-right, "#000", $breadcrumb-divider-color);
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-size: contain;
+}
+
+@import "uikit/src/scss/uikit.scss";
+
+h1 + p, h2 + p, h3 + p, h4 + p, h5 + p {
+    margin-top: $global-small-margin;
+}
+
+.admonition {
+    @extend .uk-alert;
+    color: $global-color;
+    .admonition-title {
+        margin-bottom: 0;
+        font-weight: bolder;
+    }
+}
+.admonition.note {
+    @extend .uk-alert-warning;
+    color: $global-color;
+    border-left: 6px solid $global-warning-background;
+}
+
+.admonition.warning {
+    @extend .uk-alert-danger;
+    color: $global-color;
+    border-left: 6px solid $global-danger-background;
+}
+
+table th p:last-child, table td p:last-child {
+    margin-bottom: 0
+}
+
+dl.method, dl.class {
+    @extend .uk-description-list;
+}
+
+.body ul {
+    @extend .uk-list;
+    @extend .uk-list-bullet;
+    margin-left: $global-small-margin;
+}
+
+.body ol {
+    @extend .uk-list;
+    margin-left: $global-small-margin;
+    list-style-type: decimal;
+    list-style-position: outside;
+    margin-left: $global-margin + $global-small-margin;
+    li:before {
+        content: unset;
+        display: unset;
+    }
+    p:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.code-block-caption {
+    font-size: 14px;
+    line-height: 1.857142857;
+    padding-left: $global-small-gutter;
+}
+
+.figure {
+    text-align: center;
+    .caption {
+        font-size: 14px;
+        line-height: 1.857142857;
+        padding-left: $global-small-gutter;
+        margin-top: $global-small-gutter
+    }
+}
+
+pre {
+    box-sizing: border-box;
+    background: #f9fafa;
+    border: 1px solid #e6e6e6;
+    border-radius: 4px;
+    line-height: 26px;
+    speak: literal-punctuation;
+    padding: $global-small-gutter - 1px;
+    margin-top: $global-margin;
+}
+.literal-block-wrapper pre {
+    margin-top: 0;
+}
+
+.body > .section > .section + .section {
+    margin-top: 1.5294118rem;
+    &:before {
+        content: "";
+        display: block;
+        border-top: 1px solid $global-border;
+    }
+}
+
+td > div.notranslate:last-child > div.highlight > pre {
+    margin-bottom: 0;
+}
+
+.sphinxsidebarwrapper > ul.current {
+    @extend .uk-nav-default;
+    @extend .uk-nav;
+}
+
+.localtoc a:after {
+    content: ' ';
+    display: inline-block;
+    @include svg-fill($chevron-down, "#000", $global-link-color);
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-size: contain;
+}
+
+ul.current > li.current,
+.localtoc > ul li:first-child {
+    @extend .uk-active;
+    @extend .uk-parent;
+    @extend .uk-open;
+    background: #fff;
+}
+
+.sphinxsidebarwrapper > ul.current > li.current > ul,
+.sphinxsidebarwrapper > .uk-nav > ul > li > ul {
+    @extend .uk-nav-sub;
+    background: #fff;
+}

@@ -1,8 +1,3 @@
-.. image::  /images/labtestlogo.svg
-    :alt: Lab Test
-    :width:     400
-
-
 .. toctree::
    :maxdepth: 2
 
@@ -10,10 +5,11 @@
    installation
    getting_started
    builtin_build_process
+   backing_services/index
    tutorial
    configuration
    admin/index
-   modules
+   api/modules
    contributing
    authors
    history

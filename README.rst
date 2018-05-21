@@ -17,8 +17,8 @@ Lab Test
      :target: https://pyup.io/repos/github/coordt/labtest/
      :alt: Updates
 
-* Free software: BSD license
-* Documentation: https://labtest.readthedocs.io.
+:Free software: BSD license
+:Documentation: https://labtest.readthedocs.io.
 
 
 Overview
@@ -37,15 +37,15 @@ There are three parts to LabTest: the server architecture (or *laboratory),* the
 Goals
 -----
 
-* Easy for developers to use
-* Easy to administrate
-* Flexible enough to conform to different team methodologies
+- Easy for developers to use
+- Easy to administrate
+- Flexible enough to conform to different team methodologies
 
 **Easy for developers to use.** There are several parts to this. It should be require as few steps as possible to:
 
-    - onboard a new developer
-    - create, update, and delete experiments
-    - convert a code base to use LabTest
+- onboard a new developer
+- create, update, and delete experiments
+- convert a code base to use LabTest
 
 **Easy to administrate.** LabTest only requires SSH access to the environment. Anything else you want to do is up to you.
 

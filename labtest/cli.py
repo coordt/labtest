@@ -21,6 +21,7 @@ def main(ctx, config, **kwargs):
 main.add_command(instance.create)
 main.add_command(instance.update)
 main.add_command(instance.delete)
+main.add_command(instance.list)
 main.add_command(check_config, 'check-config')
 
 if __name__ == "__main__":

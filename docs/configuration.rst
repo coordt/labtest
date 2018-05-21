@@ -7,9 +7,9 @@ Automatic configuration files
 
 Most code repositories have enough configuration files, and we didn't want to add *another* configuration file. Lab Test will automatically look for its configuration information  in several files already in your repository, under a ``labtest`` section:
 
-    - ``.labtest.yml``
-    - ``setup.cfg``
-    - ``package.json``
+- ``.labtest.yml``
+- ``setup.cfg``
+- ``package.json``
 
 Alternate configuration files
 =============================
@@ -39,16 +39,40 @@ There are several options that are required in order for Lab Test to work correc
 
 .. _host_config_option:
 
-host
-----
+``host``
+--------
 
-The DNS name, IP address or SSH config ``Host`` of the test server.
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``None``
+    * - Required:
+      - ``True``
+    * - Acceptable values:
+      - String or IP Address
+
+The DNS name, IP address or SSH config ``Host`` of the test server. You need this to connect to the laboratory.
 
 
 .. _test_domain_config_option:
 
-test_domain
------------
+``test_domain``
+---------------
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``None``
+    * - Required:
+      - ``True``
+    * - Acceptable values:
+      - String
 
 The DNS subdomain in which the test server lives. This is the wildcard DNS name without the ``*.``\ , like ``test.example.com``\ . This is used with :ref:`host_name_pattern_config_option` to create the virtual host name.
 
@@ -57,20 +81,40 @@ Optional configuration options
 
 .. _app_name_config_option:
 
-app_name
---------
+``app_name``
+------------
 
-*Default:* name of the project directory
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - The name of the project directory
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - Strings
 
 The name of the application. Ideally this should be a URL-friendly value. In order to get the default value, the labtest command must be made from within a Git repository.
 
 
 .. _host_name_pattern_config_option:
 
-host_name_pattern
------------------
+``host_name_pattern``
+---------------------
 
-*Default:* ``%(APP_NAME)s-%(INSTANCE_NAME)s``
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``%(APP_NAME)s-%(INSTANCE_NAME)s``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - String with placeholders suitable for a URL
 
 The pattern to use to generate the host part of the DNS address. This is used with :ref:`test_domain_config_option` to generate the virtual host name.
 
@@ -85,10 +129,20 @@ This pattern may contain `Python string interpolation formatting`_. The context 
 
 .. _environment_config_option:
 
-environment
------------
+``environment``
+---------------
 
-*Default:* ``[]``
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``[]``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - A sequence of strings
 
 A list of environment variable strings to include in the Docker container.
 
@@ -123,10 +177,20 @@ A list of environment variable strings to include in the Docker container.
 
 .. _use_ssh_config_config_option:
 
-use_ssh_config
---------------
+``use_ssh_config``
+------------------
 
-*Default:* ``False``
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``False``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - ``True`` or ``False``
 
 Use your local SSH config when connecting. For example, if you set this option to ``True`` and add these items (changing the various ``User`` and ``Hostname`` values) to your ``~/.ssh/config``\ :
 
@@ -150,10 +214,20 @@ You can now set the :ref:`host_config_option` configuration to ``test`` and it w
 
 .. _docker_image_pattern_config_option:
 
-docker_image_pattern
---------------------
+``docker_image_pattern``
+------------------------
 
-*Default:* ``%(APP_NAME)s/%(INSTANCE_NAME)s:latest``
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``%(APP_NAME)s/%(INSTANCE_NAME)s:latest``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - String with placeholders
 
 The image to use to build the container. Allows `Python string interpolation formatting`_\ , with ``APP_NAME`` and ``INSTANCE_NAME`` in the context
 
@@ -164,10 +238,20 @@ The value of this option depends on how your Docker images are built. (See `dock
 
 .. _build_provider_config_option:
 
-build_provider
---------------
+``build_provider``
+------------------
 
-*Default:* ``local``
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``local``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - ``local``
 
 This is how your application and Docker image are built. Currently only ``local`` is supported.
 
@@ -176,16 +260,40 @@ You must also set :ref:`code_repo_url_config_option`, :ref:`app_build_image_conf
 
 .. _code_repo_url_config_option:
 
-code_repo_url
--------------
+``code_repo_url``
+-----------------
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``None``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - URL
 
 The URL of the code repository to check out.
 
 
 .. _app_build_image_config_option:
 
-app_build_image
----------------
+``app_build_image``
+-------------------
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``None``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - String
 
 The Docker image to use to build the app. `Shippable`_ has some great `images publicly available`_\ . Here is their `docker page`_\ . This is required if you want to build the application on the test server. Also set the :ref:`app_build_command_config_option` option.
 
@@ -196,8 +304,20 @@ The Docker image to use to build the app. `Shippable`_ has some great `images pu
 
 .. _app_build_command_config_option:
 
-app_build_command
------------------
+``app_build_command``
+---------------------
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``None``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - Strings
 
 The script or command to run to build the app within the Docker image. This is required if you want to build the application on the test server. Also set the :ref:`app_build_image_config_option` option.
 
@@ -230,20 +350,31 @@ or:
 
 .. _container_build_command_config_option:
 
-container_build_command
------------------------
+``container_build_command``
+---------------------------
 
-*Default:* (reformatted for clarity)
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
 
-.. code-block:: bash
+    * - Default:
+      - (reformatted for clarity)
 
-    docker build \
-        -t $APP/$INSTANCE \
-        --build-arg RELEASE=$RELEASE \
-        --build-arg APP_NAME=$APP \
-        --build-arg BRANCH_NAME=$BRANCH \
-        --build-arg INSTANCE_NAME=$INSTANCE \
-        .
+        .. code-block:: bash
+
+            docker build \
+                -t $APP/$INSTANCE \
+                --build-arg RELEASE=$RELEASE \
+                --build-arg APP_NAME=$APP \
+                --build-arg BRANCH_NAME=$BRANCH \
+                --build-arg INSTANCE_NAME=$INSTANCE \
+                .
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - Docker build command
+
 
 This is the command to use to build the container for your app.
 
@@ -251,14 +382,26 @@ Lab Test appends this command to a script that sets the following variables: ``$
 
 If you override the docker build command, you *must* still tag it with ``$APP/$INSTANCE`` or the remaining commands will fail.
 
-:note: If your ``Dockerfile`` doesn't use the default ``--build-arg``\ s passed, they are ignored.
+.. note::
+
+    If your ``Dockerfile`` doesn't use the default ``--build-arg``\ s passed, they are ignored.
 
 
 .. _container_provider_config_option:
 
-container_provider
-------------------
+``container_provider``
+----------------------
 
-*Default:* ``local``
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``local``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - ``local`` or ``aws``
 
 This is to extend how Lab Test can talk to different Docker container repositories. Currently only ``local`` and ``aws`` are supported.

@@ -202,7 +202,9 @@ and you will drop into a Bash shell in your build environment. If you want to mo
 
 This mounts the current working directory into ``/build`` and makes that your starting working directory.
 
-:note: These are **big** images. Be prepared for a several GB download.
+.. note::
+
+    These are **big** images. Be prepared for a several GB download.
 
 
 Are we ready?
@@ -281,9 +283,13 @@ We can create an experiment but running ``labtest create <branchname>``\ . We'll
 
 **Success!!** Our experiment is available at ``vizwiz-labtest.digital-test.boston.gov``\ . Each experiment's URL is created using the template ``<app_name>-<instance_name>.<test_domain>``\ , although you can configure this via :ref:`host_name_pattern_config_option`.
 
-:note: That URL is only for the purposes of this tutorial. It doesn't work.
+.. note::
 
-:note: Lab Test's commands are `idempotent`_. You can run the same command over and over without harm.
+    That URL is only for the purposes of this tutorial. It doesn't work.
+
+.. note::
+
+    Lab Test's commands are `idempotent`_. You can run the same command over and over without harm.
 
 .. _idempotent: https://en.wikipedia.org/wiki/Idempotence
 

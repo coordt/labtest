@@ -39,6 +39,10 @@ Parameters:
     Description: 'The private IP address to use.'
     Type: String
     Default: '10.20.10.41'
+  DomainName:
+    Description: 'The domain name for the server.'
+    Type: String
+    Default: ''
 Mappings:
   RegionMap:
     ap-south-1:
@@ -83,6 +87,7 @@ Resources:
     Type: Custom::RSAKey
     Properties:
       Name: !Sub '/${AWS::StackName}/ec2-user/private-key'
+      KeySize: 4096
       Version: v1
       NoEcho: True
       ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-secret-provider'
@@ -94,6 +99,12 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupDescription: !Ref Name
+      VpcId:
+        'Fn::ImportValue': !Sub '${ParentVPCStack}-VPC'
+  ClientSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Security group to allow only specific resources to connect to services.
       VpcId:
         'Fn::ImportValue': !Sub '${ParentVPCStack}-VPC'
   SecurityGroupInSSHBastion:
@@ -180,6 +191,32 @@ Resources:
                   - ecr:BatchCheckLayerAvailability
                   - ecr:GetRepositoryPolicy
                   - ecr:PutLifecyclePolicy
+                Resource:
+                  - '*'
+        - PolicyName: rexray
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                    - ec2:AttachVolume
+                    - ec2:CreateVolume
+                    - ec2:CreateSnapshot
+                    - ec2:CreateTags
+                    - ec2:DeleteVolume
+                    - ec2:DeleteSnapshot
+                    - ec2:DescribeAvailabilityZones
+                    - ec2:DescribeInstances
+                    - ec2:DescribeVolumes
+                    - ec2:DescribeVolumeAttribute
+                    - ec2:DescribeVolumeStatus
+                    - ec2:DescribeSnapshots
+                    - ec2:CopySnapshot
+                    - ec2:DescribeSnapshotAttribute
+                    - ec2:DetachVolume
+                    - ec2:ModifySnapshotAttribute
+                    - ec2:ModifyVolumeAttribute
+                    - ec2:DescribeTag
                 Resource:
                   - '*'
   IAMPolicySSHAccess:
@@ -460,11 +497,56 @@ Resources:
                 [Install]
                 WantedBy=multi-user.target
             /opt/install_nginx_proxy.sh:
-              content: |
+              content: !Sub |
                 #!/bin/bash -e
                 systemctl start docker
                 docker pull jwilder/nginx-proxy
-                docker create -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock --name nginx_proxy -t jwilder/nginx-proxy
+                docker create -p 80:80 -e DEFAULT_HOST=${DomainName} -v /var/run/docker.sock:/tmp/docker.sock --name nginx_proxy -t jwilder/nginx-proxy
+              mode: '000755'
+              owner: root
+              group: root
+            /etc/rexray/config.yml:
+              content: !Sub |
+                rexray:
+                  logLevel: warn
+                  modules:
+                    default-docker:
+                      type: docker
+                      desc: The default docker module.
+                libstorage:
+                  host: unix:///var/run/rexray/localhost.sock
+                  # The libstorage.service property directs a libStorage client to direct its
+                  # requests to the given service by default. It is not used by the server.
+                  service: ebs
+                  integration:
+                    volume:
+                      operations:
+                        create:
+                          default:
+                            size: 10 # GB
+                  server:
+                    services:
+                      ebs:
+                        driver: ebs
+                        ebs:
+                          region:            ${AWS::Region}
+                        securityGroups:
+                          - ${SecurityGroup.GroupId}
+                          - ${ClientSecurityGroup.GroupId}
+                        tag:                 labtest
+                        disableSessionCache: false
+                        statusMaxAttempts:   5
+                        statusInitialDelay:  100ms
+                        statusTimeout:       2m
+                    libstorage:
+                      storage:
+                        driver: ebs
+              mode: '000644'
+            /opt/install_rexray.sh:
+              content: |
+                #!/bin/bash -e
+                /usr/bin/curl -ssL https://rexray.io/install | sh
+                chgrp docker /etc/rexray/config.yml
               mode: '000755'
               owner: root
               group: root
@@ -494,6 +576,9 @@ Resources:
               cwd: /opt
             a_install_rsa_keys:
               command: ./install_rsa_keys.sh
+              cwd: /opt
+            b_install_rexray:
+              command: ./install_rexray.sh
               cwd: /opt
           services:
             sysvinit:
@@ -530,6 +615,7 @@ Resources:
       PrivateIpAddress: !Ref PrivateIPAddress
       SecurityGroupIds:
         - !Ref SecurityGroup
+        - !Ref ClientSecurityGroup
       KeyName: !If [HasKeyName, !Ref KeyName, !Ref 'AWS::NoValue']
       SubnetId:
         'Fn::ImportValue': !Sub '${ParentVPCStack}-SubnetAPublic'
