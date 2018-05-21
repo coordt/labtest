@@ -58,21 +58,3 @@ def setup_service(service_name, local_template_path, context, quiet=False):
         sudo('systemctl start {}.service'.format(service_name), quiet=quiet)
     else:
         start_service(service_name, quiet)  # Just to make sure the service is running
-
-
-def _setup_service(config):
-    """
-    Set up the service
-    """
-    context = {'SERVICE_NAME': config['name']}
-
-    systemd_template = os.path.join(os.path.dirname(__file__), 'templates', 'systemd-backing.conf.template')
-    systemd_tmp_dest = '/tmp/{service_name}.service'.format(**config)
-    systemd_dest = '/etc/systemd/system/{service_name}.service'.format(**config)
-    if not exists(systemd_dest):
-        click.echo('  Creating the OS service: {service_name}'.format(**config))
-        upload_template(systemd_template, systemd_tmp_dest, context)
-        sudo('mv {} {}'.format(systemd_tmp_dest, systemd_dest), quiet=env.quiet)
-        sudo('systemctl enable {service_name}.service'.format(**config), quiet=env.quiet)
-        click.echo('  Starting the OS service: {service_name}'.format(**config))
-        sudo('systemctl start {service_name}.service'.format(**config), quiet=env.quiet)
