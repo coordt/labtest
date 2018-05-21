@@ -37,7 +37,9 @@ Lab Test's SSH setup is based on a great article about `managing SSH access thro
 
 9. Done!
 
-:note: Some symbols in the IAM user name are changed for SSH. Specifically:
+.. note::
+
+    Some symbols in the IAM user name are changed for SSH. Specifically:
 
     - ``+`` to ``.plus.``
     - ``=`` to ``.equal.``

@@ -39,20 +39,57 @@ On-demand services are specified in the ``services`` section of the experiment c
 In this example ``docker`` will provision an ``independent`` ``mysql`` service named ``mydb``\ .
 
 
-provider
----------
+``provider``
+------------
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``None``
+    * - Required:
+      - ``True``
+    * - Acceptable values:
+      - ``docker``
 
 A ``provider`` is the method of hosting the backing service you need. Right now only ``docker`` is supported, but others will be possible in the future.
 
-service
--------
+``service``
+-----------
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``None``
+    * - Required:
+      - ``True``
+    * - Acceptable values:
+      - Depends on the services provided by the provider
 
 The ``service`` is the type of service to provision, such as MySQL, Redis, or ElasticSearch. Different providers can provision different services. Check out the :ref:`backing_services_providers` to see the options.
 
+
 .. _backing_services_provision_types:
 
-provision_type
---------------
+``provision_type``
+------------------
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``independent``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - ``communal``\ , ``independent``\ , or ``shared``
 
 LabTest supports three types of provisioning of backing services: ``communal``\ , ``independent``\ , and ``shared``\ .
 
@@ -63,13 +100,38 @@ In an *independent* server provisioning, each experiment has their own service i
 In a *shared* server provisioning, an experiment uses the exact service instance as another experiment. No provisioning is done at all. You will also have to specify the ``shared_experiment_name`` and possibly ``shared_app_name`` so LabTest can retrieve the appropriate configuration information.
 
 
-shared_experiment_name
-----------------------
+``shared_experiment_name``
+--------------------------
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``None``
+    * - Required:
+      - Only if ``provision_type`` is ``shared``
+    * - Acceptable values:
+      - Name of any other experiment running
 
 This parameter is only required if you specify ``provision_type: shared``\ . The value is the name of the experiment responsible for the database.
 
-shared_app_name
----------------
+
+``shared_app_name``
+-------------------
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - Current app name
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - Name of any other app running an experiment
 
 You only need to specify this parameter if you need to share a database with another application for some reason. This value defaults to the same app name as your experiment. You need to set the ``shared_instance_name`` as well.
 
@@ -77,7 +139,7 @@ You only need to specify this parameter if you need to share a database with ano
 .. _backing_services_providers:
 
 Providers
----------
+=========
 
 .. toctree::
    :maxdepth: 2

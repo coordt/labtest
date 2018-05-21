@@ -43,7 +43,7 @@ Example setup
 
 This setup shows an example setup created through :ref:`setting_up_the_laboratory`\ .
 
-.. image:: /images/test-infrastructure.png
+.. image:: /images/test-infrastructure.svg
 
 - :abbr:`VPC (Virtual Private Cloud)`
 - SSH Bastion
@@ -72,7 +72,7 @@ We created a `test server template`_ to create this server.
 
 When the Docker container for an experiment runs, it can tell nginx proxy to route all traffic for ``foo.test.example.com`` to it.
 
-.. image:: /images/test-server.png
+.. image:: /images/test-server.svg
 
 .. _cloud formation template: http://templates.cloudonaut.io/en/stable/vpc/
 .. _widdix: https://cloudonaut.io/
@@ -96,9 +96,12 @@ An experiment is a version (branch) of your code running in a Docker container o
 Creating an experiment
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. image:: /images/test-instance-steps.png
-
 Creating an experiment is based on the idea of a mini-deployment using a Docker container. Each experiment has three parts: the application name, the branch name and the instance name. The application name is the name of the project or application. This provides a namespace for the instance names. If you are testing multiple applications, you might have branches with the same name across the different projects.
+
+.. figure:: /images/test-instance-steps.svg
+    :alt: Steps for making an experiment
+
+    The steps LabTest goes through when creating an experiment
 
 Typically the instance name is the same as the branch name, but they don't have to be. You can have two experiments using the same branch, but with different instance names.
 

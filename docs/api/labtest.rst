@@ -51,6 +51,14 @@ labtest.secrets module
     :undoc-members:
     :show-inheritance:
 
+labtest.services module
+-----------------------
+
+.. automodule:: labtest.services
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
