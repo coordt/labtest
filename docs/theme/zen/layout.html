@@ -1,0 +1,164 @@
+{%- extends "alabaster/layout.html" %}
+
+{%- macro sidebar() %}
+      {%- if render_sidebar %}
+      <div class="sphinxsidebar foofofof" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+          {%- block sidebarlogo %}{%- endblock %}
+          {%- if sidebars != None %}
+            {#- new style sidebar: explicitly include/exclude templates #}
+            {%- for sidebartemplate in sidebars %}
+            {%- include sidebartemplate %}
+            {%- endfor %}
+          {%- else %}
+            {#- old style sidebars: using blocks -- should be deprecated #}
+            {%- block sidebartoc %}
+            {%- include "localtoc.html" %}
+            {%- endblock %}
+            {%- block sidebarrel %}
+            {%- include "relations.html" %}
+            {%- endblock %}
+            {%- block sidebarsourcelink %}
+            {%- include "sourcelink.html" %}
+            {%- endblock %}
+            {%- if customsidebar %}
+            {%- include customsidebar %}
+            {%- endif %}
+            {%- block sidebarsearch %}
+            {%- include "searchbox.html" %}
+            {%- endblock %}
+          {%- endif %}
+        </div>
+      </div>
+      {%- endif %}
+{%- endmacro %}
+
+
+{%- block extrahead %}
+<!-- UIkit CSS -->
+<link href="https://fonts.googleapis.com/css?family=Fira+Mono:400,700" rel="stylesheet">
+<link rel="stylesheet" href="{{ pathto('_static/site.css', 1) }}" />
+<!-- UIkit JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-rc.2/js/uikit.min.js"></script>
+{% endblock %}
+
+{% block header %}
+  <div uk-sticky="sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky">
+    <nav class="uk-navbar-container">
+      <div class="uk-container">
+        <div class="uk-navbar" uk-navbar>
+          <div class="uk-navbar-left">
+            <a href="{{ pathto(master_doc) }}" class="uk-navbar-item uk-logo">
+              <img class="logo" src="{{ pathto('_static/' ~ theme_logo, 1) }}" width="100" alt="Logo"/>
+            </a>
+            {%- block headertitle %}
+            {%- endblock %}
+            <div class="uk-navbar-item">
+              <ul class="uk-breadcrumb uk-margin-remove-bottom">
+                {% if pagename != master_doc %}
+                  <li><a href="{{ pathto(master_doc) }}">{{ shorttitle|e }}</a></li>
+                {% endif %}
+                {%- for parent in parents %}
+                    <li><a href="{{ parent.link|e }}">{{ parent.title }}</a></li>
+                {%- endfor %}
+                <li><span>{{ title }}</span></li>
+              </ul>
+            </div>
+          </div> {# uk-navbar-left #}
+          <div class="uk-navbar-right">
+            {% if theme_github_user and theme_github_repo %}
+              {% if theme_github_button|lower == 'true' %}
+                <div class="uk-navbar-item">
+
+                  <a class="nav-link" href="https://github.com/{{ theme_github_user }}/{{ theme_github_repo }}">
+                    <span class="uk-icon">
+                      <svg version="1.1" width="20" height="20" viewBox="0 0 16 16" class="octicon octicon-mark-github" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+                    </span>
+                    View on GitHub
+                  </a>
+                </div>
+              {% endif %}
+            {% endif %}
+
+            {% if theme_travis_button|lower != 'false' %}
+              {% if theme_travis_button|lower == 'true' %}
+                  {% set path = theme_github_user + '/' + theme_github_repo %}
+              {% else %}
+                  {% set path = theme_travis_button %}
+              {% endif %}
+              <div class="uk-navbar-item">
+                <a href="https://travis-ci.org/{{ path }}">
+                    <img
+                        alt="https://secure.travis-ci.org/{{ path }}.svg?branch={{ theme_badge_branch }}"
+                        src="https://secure.travis-ci.org/{{ path }}.svg?branch={{ theme_badge_branch }}"
+                    />
+                </a>
+              </div>
+            {% endif %}
+
+            {% if theme_codecov_button|lower != 'false' %}
+              {% if theme_codecov_button|lower == 'true' %}
+                  {% set path = theme_github_user + '/' + theme_github_repo %}
+              {% else %}
+                  {% set path = theme_codecov_button %}
+              {% endif %}
+              <div class="uk-navbar-item">
+              <a href="https://codecov.io/github/{{ path }}">
+                  <img
+                  alt="https://codecov.io/github/{{ path }}/coverage.svg?branch={{ theme_badge_branch }}"
+                  src="https://codecov.io/github/{{ path }}/coverage.svg?branch={{ theme_badge_branch }}"
+                  />
+              </a>
+              </div>
+            {% endif %}
+          </div> {# uk-navbar-right #}
+        </div> {# uk-navbar #}
+      </div> {# uk-container #}
+    </nav>
+  </div>
+{% endblock %}
+
+{# Nav should appear before content, not after #}
+{%- block content %}
+  <div class="uk-container uk-margin-top">
+    {%- block document %}
+      <div class="uk-grid" uk-grid>
+        <div class="body {%- if render_sidebar %} uk-width-3-4@m{%- else %} uk-width-1-1{%- endif %}" role="main">
+
+          {% block body %} {% endblock %}
+        </div>
+        {%- block sidebar2 %}
+          <div class="uk-width-1-4@m">
+            {{ sidebar() }}
+          </div>
+        {% endblock %}
+      </div>
+    {%- endblock %}
+  </div>
+  {# <script src="http://files.keyes.ie/things/baseliner/baseliner-latest.min.js"></script> #}
+  {# <script> #}
+  {#  window.onload = function() {baseliner = new Baseliner({'gridHeight': 26, 'gridOffset': 3}); #}
+  {#  </script> #}
+{%- endblock %}
+
+{%- block footer %}
+<div class="uk-section uk-section-muted uk-section-small" role="contentinfo">
+    <div class="uk-container">
+        <p class="uk-text-small">
+            {%- if show_copyright %}
+              {%- if hasdoc('copyright') %}
+                {% trans path=pathto('copyright'), copyright=copyright|e %}&#169; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
+              {%- else %}
+                {% trans copyright=copyright|e %}&#169; Copyright {{ copyright }}.{% endtrans %}
+              {%- endif %}
+            {%- endif %}
+            {%- if last_updated %}
+              {% trans last_updated=last_updated|e %}Last updated on {{ last_updated }}.{% endtrans %}
+            {%- endif %}
+            {%- if show_sphinx %}
+              {% trans sphinx_version=sphinx_version|e %}Created using <a href="http://sphinx-doc.org/">Sphinx</a> {{ sphinx_version }}.{% endtrans %}
+            {%- endif %}
+        </p>
+    </div>
+</div>
+{%- endblock %}
