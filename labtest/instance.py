@@ -225,9 +225,6 @@ def _update_container():
     for host in env.backing_service_configs.get('hosts', []):
         cmd.append('--add-host {}'.format(host))
 
-    # for link in env.backing_service_configs.get('links', []):
-    #     cmd.append('--link {}'.format(link))
-
     cmd.append('{docker_image}')
 
     click.echo('Creating the Docker container.')
