@@ -5,10 +5,11 @@ class BaseService(object):
     """
     Base class for managing a backing service
 
-    :param service: The type of the service, like ``mysql`` or ``redis``
-    :param create_function: The function to call to create the service
-    :param destroy_function: The function to call to destroy the service
-    :param check_config_function: The function to call to check for a valid configuration for this service
+    Args:
+        service: The type of the service, like ``mysql`` or ``redis``
+        create_function: The function to call to create the service
+        destroy_function: The function to call to destroy the service
+        check_config_function: The function to call to check for a valid configuration for this service
     """
 
     def __init__(self, service, create_function=None, destroy_function=None, check_config_function=None):
@@ -21,18 +22,21 @@ class BaseService(object):
         """
         Creates the service (if necessary)
 
-        Example result::
+        Args:
+            config:  The configuration for the service
+            name:    The name of the service
 
-            {
-                'environment': [],  # Items to add to the environment of the container (--env)
-                'links': [],  # links in the ``containername:localname`` format for --link
-                'hosts': []  # Add hosts using the --add-host option
-            }
+        Returns:
+            A ``dict`` that may include ``environment`` or ``hosts`` keys. These
+            are a method of communication back to the experiment to potentially
+            alter its own container
 
-        :param config:  The configuration for the service
-        :param name:    The name of the service
+            Example result::
 
-        :return: dict
+                {
+                    'environment': [],  # Items to add to the environment of the container (--env)
+                    'hosts': []  # Add hosts using the --add-host option
+                }
         """
         if config.get('provision_type', 'independent') != 'independent':
             return {}  # There is nothing to do if it isn't an independent provision
@@ -45,8 +49,9 @@ class BaseService(object):
         """
         Removes the service, if it is still there, and cleans up
 
-        :param      config:  The configuration of the service
-        :param      name:    The name of the service
+        Args:
+            config:  The configuration of the service
+            name:    The name of the service
         """
         if config.get('provision_type', 'independent') != 'independent':
             return  # There is nothing to do if it isn't an independent provision
@@ -59,13 +64,16 @@ class BaseService(object):
         """
         Check the configuration to make sure it is valid for this service.
 
-        If sub-classes don't provide a ``check_config_function``, it will always
-        return ``True``.
+        Note:
+            If sub-classes don't provide a ``check_config_function``, it will always
+            return ``True``.
 
-        :param      self:    The object
-        :param      config:  The configuration
+        Args:
+            self:    The object
+            config:  The configuration
 
-        :return:     boolean
+        Returns:
+            ``True`` if the configuration is valid, otherwise ``False``.
         """
         if self.check_config_function is None:
             return True

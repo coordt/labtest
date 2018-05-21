@@ -211,12 +211,14 @@ def _get_service_config(config, name):
 
 def create(config, name):
     """
-    @brief      Create the service
+    Create the service
 
-    @param      config  The configuration
-    @param      name The name of the service
+    Args:
+        config:  The configuration
+        name: The name of the service
 
-    @return The name of the docer container for linking
+    Returns:
+        An empty``dict``. There is no additional information required for the experiment.
     """
     service_config = _get_service_config(config, name)
 
@@ -244,16 +246,16 @@ def create(config, name):
 
         _write_config(service_config, service_config['config_path'])
 
-    return {
-        'links': ['{service_name}:{name}'.format(**service_config)]
-    }
+    return {}
 
 
 def destroy(config, name):
     """
-    @brief      Destroy the service
+    Destroy the service and clean up
 
-    @param      config  The configuration
+    Args:
+        config:  The service configuration
+        name: The name for the service
     """
     service_config = _get_service_config(config, name)
     click.echo('Destroying MySQL service.')
@@ -273,10 +275,12 @@ def destroy(config, name):
 
 def check_config(config):
     """
-    @brief      Make sure all the proper arguments are in there
+    Make sure all the proper arguments are in there
 
-    @param      config  The configuration
+    Args:
+        config:  The configuration
 
-    @return     Boolean
+    Returns:
+       ``True`` if the configuration is correct, otherwise ``False``.
     """
     pass
