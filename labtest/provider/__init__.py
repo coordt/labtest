@@ -13,9 +13,13 @@ providers = {
 
 def check_services_config(services):
     """
-    @brief      Make sure the services are configured correctly
+    Make sure the services are configured correctly
 
-    @param      services  The services confgiuration
+    Args:
+        services:  The services confgiuration to check
+
+    Raises:
+        ClickException: If there is an error
     """
     for service_name, config in iteritems(services):
         if 'provider' not in config:
