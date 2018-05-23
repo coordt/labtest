@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open('requirements/prod.txt') as req_file:
     requirements = [x for x in req_file.readlines() if x and x[0] not in ('-', '#')]
@@ -28,9 +28,7 @@ setup(
     author="Corey Oordt",
     author_email='coreyoordt@gmail.com',
     url='https://github.com/CityOfBoston/labtest',
-    packages=[
-        'labtest',
-    ],
+    packages=find_packages(exclude=['tests*', 'docs', 'build', ]),
     package_dir={'labtest':
                  'labtest'},
     entry_points={
