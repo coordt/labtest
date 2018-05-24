@@ -5,6 +5,7 @@ import click
 from .config import get_config, check_config
 from dotenv import load_dotenv, find_dotenv
 from . import instance
+from . import secrets
 
 
 @click.group(invoke_without_command=True)
@@ -22,6 +23,8 @@ main.add_command(instance.create)
 main.add_command(instance.update)
 main.add_command(instance.delete)
 main.add_command(instance.list)
+main.add_command(instance.test)
+main.add_command(secrets.encrypt)
 main.add_command(check_config, 'check-config')
 
 if __name__ == "__main__":

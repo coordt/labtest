@@ -6,6 +6,18 @@ LabTest tries to keep the amount of administration to a minimum. However, that d
 
 Since LabTest is designed to be easy to destroy and rebuild, storing state on the Laboratory server isn't a good idea. Instead you can create a file on the Laboratory server (``/testing/state.json``\ ) that indicates where the state is stored.
 
+When it state needed?
+=====================
+
+State is necessary to
+
+- tell the client something it couldn't know, like which secret provider to use
+- provide defaults for provisioning
+
+
+
+.. _state_keys_and_values:
+
 State keys and values
 =====================
 
@@ -27,18 +39,31 @@ Take this example:
     :caption:   Example state hierarchy
 
     services
-      postgresql
-        default
-        shared
-        app-name1
-      mysql
-        default
-        shared
-        app-name2
+      docker
+        postgresql
+          default
+          shared
+          app-name1
+        mysql
+          default
+          shared
+          app-name2
 
-If you wanted to get the value for ``/services/postgresql/app-name1``\ , the state looks and sees there is a value for that.
+.. figure:: /images/state-search-postgresql.svg
+    :alt: Searching the state for /services/docker/postgresql/app-name1
+    :width: 400
 
-However, if you attempted to get the value for ``/services/mysql/app-name1``\ , the state doesn't find ``app-name1`` under ``/services/mysql/``\ . Next it looks for ``/services/mysql/default``\ , which it finds and returns.
+    Searching the state for /services/docker/postgresql/app-name1 finds it on the first attempt.
+
+If you wanted to get the value for ``/services/docker/postgresql/app-name1``\ , the state looks and sees there is a value for that.
+
+.. figure:: /images/state-search-mysql.svg
+    :alt: Searching the state for /services/docker/mysql/app-name1
+    :width: 400
+
+    Searching the state for /services/docker/mysql/app-name1 finds it on the third attempt.
+
+However, if you attempted to get the value for ``/services/docker/mysql/app-name1``\ , the state doesn't find ``app-name1`` under ``/services/docker/mysql/``\ . Next it looks for ``/services/docker/mysqlapp-name1/default`` and then ``/services/docker/mysql/default``, which it finds and returns.
 
 For security reasons, the LabTest client has read-only privledges on the state. The method of writing the values is dependent on the state provider.
 
@@ -46,7 +71,25 @@ For security reasons, the LabTest client has read-only privledges on the state. 
 state.json
 ==========
 
-The only required key and value in ``state.json`` is ``provider``\ . All other keys and values are dependent on that value.
+This file configures LabTest's method for retrieving state. It should exist at ``/testing/state.json``\ . The only required key and value in ``state.json`` is ``provider``\ . All other keys and values are dependent on the provider.
+
+Configuration
+-------------
+
+``provider``
+~~~~~~~~~~~~
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``None``
+    * - Required:
+      - ``True``
+    * - Acceptable values:
+      - String of a state provider
 
 
 State providers
@@ -55,12 +98,7 @@ State providers
 Local Script
 ------------
 
-*provider:* ``script``
-*command:* ``<command>``
-
 You can specify a script or command local to the Laboratory server to execute and return the requested state. The ``provider`` is ``script`` and it requires a ``command`` key with the command to execute.
-
-The script should accept a hierarchical key (``/a/b/c``\ ) and return a value to standard out. Errors are treated as if the key was not found.
 
 .. code-block:: javascript
     :caption:   Configuration for a local script state provider
@@ -69,6 +107,25 @@ The script should accept a hierarchical key (``/a/b/c``\ ) and return a value to
         "provider": "script",
         "command": "/testing/bin/get-state"
     }
+
+
+``command``
+~~~~~~~~~~~
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``None``
+    * - Required:
+      - ``True`` if ``provider`` is ``script``
+    * - Acceptable values:
+      - String of a command to call
+
+
+The script should accept a hierarchical key (``/a/b/c``\ ) and return a value to standard out. It should follow the discovery path as described in :ref:`state_keys_and_values`. Errors are treated as if the key was not found.
 
 Here is a simple Bash script for example:
 
@@ -81,21 +138,78 @@ Here is a simple Bash script for example:
 AWS S3
 ------
 
-*provider:* ``s3``
-*bucket:* ``<bucketname>``
-
 S3 provides a flexible method for storing state information, since there are many ways for administrators to update it and secure it. The ``provider`` is ``s3``\ , and it requires a ``bucket`` key for the name of the bucket.
+
+
+- local caching
+    - look at local filesystem first, then query s3 and save it to local filesystem
+    - should have a cron job to sync s3
 
 .. code-block:: javascript
     :caption:   Configuration for an S3 state provider
 
     {
         "provider": "s3",
-        "bucket": "labtest"
+        "bucket": "labtest",
+        "cache": true,
+        "cache_path": "/testing/state/"
     }
 
+``bucket``
+~~~~~~~~~~
 
-Default state provider
-======================
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
 
-LabTest attempts to use AWS S3 as a default state provider when you don't explicitly set a state provider. If LabTest doesn't see a ``state.json`` configuration file, it checks for an S3 bucket named ``labtest``\ . If the bucket exists and is accessible, it attempts to find its state there.
+    * - Default:
+      - ``None``
+    * - Required:
+      - ``True`` if ``provider`` is ``s3``
+    * - Acceptable values:
+      - Name of an S3 bucket
+
+This is the name of the S3 bucket that stores the state.
+
+``cache``
+~~~~~~~~~
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``True``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - ``True`` or ``False``
+
+LabTest can keep a local cache on the laboratory filesystem. This can speed up queries and reduce costs. LabTest will look in the cache first, and only download the state file if it doesn't exist.
+
+You can even prime the cache using a cron job that syncronizes the S3 bucket to the local cache.
+
+.. code-block:: console
+    :caption: Command to syncronize the state from the S3 bucket to the local filesystem.
+
+    $ aws s3 sync s3://mylabteststate /testing/state --delete
+
+
+``cache_path``
+~~~~~~~~~~~~~~
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``/testing/state/``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - A directory path
+
+This is where LabTest will cache the documents it retrieves from the S3 bucket.

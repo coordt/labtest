@@ -1,6 +1,9 @@
-=============
-Configuration
-=============
+========================
+Experiment Configuration
+========================
+
+In order for LabTest to create an experiment, it needs a little bit of information about your project. LabTest :ref:`requires <configuration_required_options>` very little configuration, but allows for lots of :ref:`customization <configuration_optional_options>`\ .
+
 
 Automatic configuration files
 =============================
@@ -31,6 +34,7 @@ You can alternatively pass the configuration file to Lab Test at the command lin
    :language: json
    :caption: Example ``.json`` configuration
 
+.. _configuration_required_options:
 
 Required configuration options
 ==============================
@@ -75,6 +79,8 @@ The DNS name, IP address or SSH config ``Host`` of the test server. You need thi
       - String
 
 The DNS subdomain in which the test server lives. This is the wildcard DNS name without the ``*.``\ , like ``test.example.com``\ . This is used with :ref:`host_name_pattern_config_option` to create the virtual host name.
+
+.. _configuration_optional_options:
 
 Optional configuration options
 ==============================
@@ -229,9 +235,9 @@ You can now set the :ref:`host_config_option` configuration to ``test`` and it w
     * - Acceptable values:
       - String with placeholders
 
-The image to use to build the container. Allows `Python string interpolation formatting`_\ , with ``APP_NAME`` and ``INSTANCE_NAME`` in the context
+The string pattern to use when dynamically determining which image to use to build the container. Allows `Python string interpolation formatting`_\ , with ``APP_NAME`` and ``INSTANCE_NAME`` in the context.
 
-The value of this option depends on how your Docker images are built. (See `docker pull documentation`_ for more information about specifying images) If they are built using the default Lab Test method (the default), then the images will be local to the test server and can use a simple name. If the Docker images are built using an external process and in a private repo, the name will look like a URL, without the ``https://``\ .
+The value of this option depends on how your Docker images are built. (See `docker pull documentation`_ for more information about specifying images) If they are built using the :ref:`built-in <builtin_build_process>` Lab Test method (the default), then the images will be local to the test server and can use a simple name. If the Docker images are built using an external process and in a private repo, the name will look like a URL, without the ``https://``\ .
 
 .. _docker pull documentation: https://docs.docker.com/engine/reference/commandline/pull/
 

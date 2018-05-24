@@ -43,6 +43,10 @@ Parameters:
     Description: 'The domain name for the server.'
     Type: String
     Default: ''
+  StateBucketName:
+    Description: 'Name of the bucket to use to hold state information.'
+    Type: String
+    Default: ''
 Mappings:
   RegionMap:
     ap-south-1:
@@ -240,6 +244,20 @@ Resources:
               - 'iam:GetSSHPublicKey'
             Resource:
               - !Sub 'arn:aws:iam::${AWS::AccountId}:user/*'
+  Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref StateBucketName
+      LifecycleConfiguration:
+        Rules:
+        - AbortIncompleteMultipartUpload:
+            DaysAfterInitiation: 7
+          Status: Enabled
+        - NoncurrentVersionExpirationInDays: 7
+          Status: Enabled
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption: !Ref 'AWS::NoValue'
   TestMachine:
     Type: 'AWS::EC2::Instance'
     Metadata:
@@ -570,6 +588,12 @@ Resources:
               mode: '000400'
               owner: ec2-user
               group: ec2-user
+            /testing/state.json:
+              content: !Sub |
+                {"provider": "s3", "bucket": "${StateBucketName}"}
+              mode: '000664'
+              owner: ec2-user
+              group: docker
           commands:
             a_install_nginx_proxy:
               command: ./install_nginx_proxy.sh

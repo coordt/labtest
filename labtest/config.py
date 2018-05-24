@@ -5,6 +5,37 @@ from past.builtins import basestring
 from .configobj import Config
 import click
 
+from fabric.api import task, execute
+from fabric.context_managers import hide
+from fabric.contrib.files import exists
+from .filesystem import get_file_contents
+
+
+@task
+def get_state():
+    """
+    Task to get the state provider from the remote server and return a State object
+
+    Returns:
+        A subclass instance of :ref:`BaseState` or ``None``
+    """
+    import json
+    from labtest.provider import state_providers
+
+    remote_path = '/testing/state.json'
+    if exists(remote_path):
+        try:
+            state_config = json.loads(get_file_contents(remote_path).getvalue())
+        except Exception as e:
+            raise click.ClickException('There was an issue reading the state config: {}'.format(e))
+
+        if state_config['provider'] not in state_providers:
+            raise click.ClickException('The state provider "{}" is does not exist in this version of LabTest.'.format(state_config['provider']))
+        else:
+            return state_providers[state_config['provider']](state_config)
+    else:
+        return None
+
 
 class LabTestConfig(Config):
     default_config_files = [
@@ -33,6 +64,16 @@ class LabTestConfig(Config):
             ]
         }
     }
+
+    def get_state(self):
+        """
+        Retrieves the state object and caches it
+        """
+        if 'state' not in self._config:
+            with hide('running'):
+                self._config['state'] = execute(get_state, hosts=self.host)[self.host]
+
+        return self._config['state']
 
     def get_default_services(self):
         """

@@ -191,6 +191,8 @@ def _setup_templates():
         for item in env.environment:
             contents.write(u'{}\n'.format(item))
         for item in env.backing_service_configs.get('environment', []):
+            if 'ENC[' in item:
+                pass
             contents.write(u'{}\n'.format(item))
         with hide('running'):
             put(local_path=contents, remote_path=env_dest)
@@ -241,6 +243,7 @@ def _setup_env_with_config(config):
     """
     Add config keys to the env
     """
+    env.config = config
     for key, val in iteritems(config.config):
         setattr(env, key, val)
     env.quiet = not config.verbose
@@ -257,8 +260,9 @@ def test_task():
         'INSTANCE_NAME': env.instance_name,
         'BRANCH_NAME': env.branch_name
     }
-    _setup_path()
-    _setup_backing_services()
+    # _setup_path()
+    print "Value received of /aws/mysql/"
+    print env.config.state.get('/aws/mysql/')
 
 
 @task
@@ -427,7 +431,7 @@ def list(ctx, app_name):
 @click.pass_context
 def test(ctx):
     """
-    Delete a test instance on the server
+    for testing
     """
     _setup_env_with_config(ctx.obj)
     execute(test_task, hosts=ctx.obj.host)

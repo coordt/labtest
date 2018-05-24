@@ -3,8 +3,8 @@ from . import mysql
 from ..base_service import BaseService
 
 
-provider = {
+service_provider = {
     'mysql': BaseService('mysql', mysql.create, mysql.destroy)
 }
 
-__all__ = ['provider']
+__all__ = ['service_provider']
