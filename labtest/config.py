@@ -17,7 +17,7 @@ def get_state():
     Task to get the state provider from the remote server and return a State object
 
     Returns:
-        A subclass instance of :ref:`BaseState` or ``None``
+        A subclass instance of :class:`BaseState` or ``None``
     """
     import json
     from labtest.provider import state_providers
@@ -31,8 +31,10 @@ def get_state():
 
         if state_config['provider'] not in state_providers:
             raise click.ClickException('The state provider "{}" is does not exist in this version of LabTest.'.format(state_config['provider']))
+        elif state_config.get('service') not in state_providers[state_config['provider']]:
+            raise click.ClickException('The state provider "{}" is does not have a state service of "{}" in this version of LabTest.'.format(state_config['provider'], state_config['service']))
         else:
-            return state_providers[state_config['provider']](state_config)
+            return state_providers[state_config['provider']][state_config['service']](state_config.get('options', {}))
     else:
         return None
 
@@ -65,21 +67,27 @@ class LabTestConfig(Config):
         }
     }
 
-    def get_state(self):
+    def get_default_app_build_command(self):
         """
-        Retrieves the state object and caches it
+        Make the app build image command optional
         """
-        if 'state' not in self._config:
-            with hide('running'):
-                self._config['state'] = execute(get_state, hosts=self.host)[self.host]
+        return ''
 
-        return self._config['state']
+    def get_default_app_build_image(self):
+        """
+        Make the app build image config optional
+        """
+        return ''
 
-    def get_default_services(self):
+    def get_default_app_name(self):
         """
-        The services the experiment requires. Defaults to an empty dict
+        The default app_name is the name of the directory containing the .git directory
         """
-        return {}
+        import os
+        import subprocess
+        out = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'])
+        dirname, name = os.path.split(out.strip())
+        return name
 
     def get_default_build_provider(self):
         """
@@ -87,33 +95,20 @@ class LabTestConfig(Config):
         """
         return 'default'
 
+    def get_default_container_provider(self):
+        """
+        Where are the images stored by default?
+        """
+        return 'local'
+
+    def get_default_container_build_command(self):
+        return 'docker build -t $APP_NAME/$INSTANCE_NAME --build-arg RELEASE=$RELEASE --build-arg APP_NAME=$APP_NAME --build-arg BRANCH_NAME=$BRANCH_NAME --build-arg INSTANCE_NAME=$INSTANCE_NAME .'
+
     def get_default_docker_image_pattern(self):
         """
         Return the default docker image name pattern
         """
         return '%(APP_NAME)s/%(INSTANCE_NAME)s:latest'
-
-    def get_default_host_name_pattern(self):
-        """
-        Return the default host name pattern
-        """
-        return '%(APP_NAME)s-%(INSTANCE_NAME)s'
-
-    def set_use_ssh_config(self, value):
-        """
-        Make sure the value is converted to a boolean
-        """
-        if isinstance(value, basestring):
-            self._config['use_ssh_config'] = (value.lower() in ['1', 'true', 'yes', ])
-        elif isinstance(value, int):
-            self._config['use_ssh_config'] = (value == 1)
-        elif isinstance(value, bool):
-            self._config['use_ssh_config'] = value
-        else:
-            self._config['use_ssh_config'] = False
-
-    def get_default_use_ssh_config(self):
-        return False
 
     def set_environment(self, value):
         """
@@ -130,36 +125,63 @@ class LabTestConfig(Config):
         """
         return []
 
-    def get_default_app_build_image(self):
+    def get_default_host_name_pattern(self):
         """
-        Make the app build image config optional
+        Return the default host name pattern
         """
-        return ''
+        return '%(APP_NAME)s-%(INSTANCE_NAME)s'
 
-    def get_default_app_build_command(self):
+    def get_default_services(self):
         """
-        Make the app build image command optional
+        The services the experiment requires. Defaults to an empty dict
         """
-        return ''
+        return {}
 
-    def get_default_container_provider(self):
+    def get_state(self):
         """
-        Where are the images stored by default?
+        Retrieves the state object and caches it
         """
-        return 'local'
+        if 'state' not in self._config:
+            with hide('running'):
+                self._config['state'] = execute(get_state, hosts=self.host)[self.host]
 
-    def get_default_container_build_command(self):
-        return 'docker build -t $APP_NAME/$INSTANCE_NAME --build-arg RELEASE=$RELEASE --build-arg APP_NAME=$APP_NAME --build-arg BRANCH_NAME=$BRANCH_NAME --build-arg INSTANCE_NAME=$INSTANCE_NAME .'
+        return self._config['state']
 
-    def get_default_app_name(self):
+    def get_secrets(self):
         """
-        The default app_name is the name of the directory containing the .git directory
+        Retrieves the secret provider from state and caches it
         """
-        import os
-        import subprocess
-        out = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'])
-        dirname, name = os.path.split(out.strip())
-        return name
+        import json
+        from labtest.provider import secret_providers
+
+        if 'secrets' not in self._config:
+            secret_config = json.loads(self.state.get('/secrets'))
+            if not isinstance(secret_config, dict):
+                raise click.ClickException('The secret provider configuration is not recognized.')
+            elif secret_config.get('provider') not in secret_providers:
+                raise click.ClickException('The secret provider "{}" is not configured in this version of LabTest'.format(secret_config.get('provider')))
+            elif secret_config.get('service') not in secret_providers[secret_config['provider']]:
+                raise click.ClickException('The secret provider "{}" is does not have a service of "{}" in this version of LabTest.'.format(secret_config['provider'], secret_config.get('service')))
+            else:
+                self._config['secrets'] = secret_providers[secret_config['provider']][secret_config['service']](secret_config.get('options', {}))
+
+        return self._config['secrets']
+
+    def set_use_ssh_config(self, value):
+        """
+        Make sure the value is converted to a boolean
+        """
+        if isinstance(value, basestring):
+            self._config['use_ssh_config'] = (value.lower() in ['1', 'true', 'yes', ])
+        elif isinstance(value, int):
+            self._config['use_ssh_config'] = (value == 1)
+        elif isinstance(value, bool):
+            self._config['use_ssh_config'] = value
+        else:
+            self._config['use_ssh_config'] = False
+
+    def get_default_use_ssh_config(self):
+        return False
 
     def validate_dependencies(self):
         """
