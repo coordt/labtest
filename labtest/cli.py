@@ -8,7 +8,7 @@ from . import instance
 from . import secrets
 
 
-@click.group(invoke_without_command=True)
+@click.group()
 @click.option('--config', '-c', type=click.Path(exists=True), help='Alternate configuration file.')
 @click.option('--verbose', '-v', is_flag=True, default=False, help='Show verbose output.')
 @click.pass_context
@@ -18,6 +18,16 @@ def main(ctx, config, **kwargs):
     if not cfg.validate():
         click.ClickException(cfg.validation_message())
     ctx.obj = cfg
+
+
+@main.command()
+def version():
+    """
+    Display the current labtest client version
+    """
+    from labtest import __version__
+    click.echo(__version__)
+
 
 main.add_command(instance.create)
 main.add_command(instance.update)
