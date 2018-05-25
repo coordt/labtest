@@ -125,12 +125,12 @@ def _setup_backing_services():
     create them
     """
     from itertools import chain
-    from provider import providers, check_services_config
+    from provider import service_providers, check_services_config
 
     check_services_config(env.services)
     additional_configs = []
     for service_name, config in iteritems(env.services):
-        service = providers[config['provider']][config['service']]
+        service = service_providers[config['provider']][config['service']]
         additional_configs.append(service.create(config, service_name))
 
     # De-dupe the additional configs
@@ -178,7 +178,9 @@ def _setup_templates():
     """
     Write the templates to the appropriate places
     """
+    import re
     from io import StringIO
+    encrypt_pattern = re.compile(r'^(.*)ENC\[([A-Za-z0-9+=/]+)\](.*)$')
 
     env_dest = u'{instance_path}/test.env'.format(**env)
     click.echo('Writing the experiment\'s environment file.')
@@ -189,10 +191,20 @@ def _setup_templates():
         for key, val in iteritems(env.context):
             contents.write(u'{}={}\n'.format(key, val))
         for item in env.environment:
+            match = encrypt_pattern.match(item)
+            if match:
+                contents.write(unicode(match.group(1)))
+                contents.write(unicode(env.config.secrets.decrypt(match.group(2))))
+                contents.write(unicode(match.group(3)))
+            else:
             contents.write(u'{}\n'.format(item))
         for item in env.backing_service_configs.get('environment', []):
-            if 'ENC[' in item:
-                pass
+            match = encrypt_pattern.match(item)
+            if match:
+                contents.write(unicode(match.group(1)))
+                contents.write(unicode(env.config.secrets.decrypt(match.group(2))))
+                contents.write(unicode(match.group(3)))
+            else:
             contents.write(u'{}\n'.format(item))
         with hide('running'):
             put(local_path=contents, remote_path=env_dest)
@@ -261,8 +273,15 @@ def test_task():
         'BRANCH_NAME': env.branch_name
     }
     # _setup_path()
-    print "Value received of /aws/mysql/"
-    print env.config.state.get('/aws/mysql/')
+    print "Starting string to encrypt"
+    pt = 'This is my secret. Keep it safe'
+    print pt
+    ct = env.config.secrets.encrypt(pt)
+    print 'Ciphertext:'
+    print ct
+    new_pt = env.config.secrets.decrypt(ct)
+    print 'Decrypted ciphertext'
+    print new_pt
 
 
 @task
