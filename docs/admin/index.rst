@@ -1,6 +1,6 @@
-=======================
-Lab Test Administration
-=======================
+==============
+Administration
+==============
 
 Contents:
 
@@ -11,4 +11,5 @@ Contents:
    setting_up_the_lab
    setting_up_users
    setting_up_the_builtin_build
-   defaults_and_state
+   defaults_and_state/index
+   secrets

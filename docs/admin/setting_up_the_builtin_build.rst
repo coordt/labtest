@@ -1,5 +1,3 @@
-.. _setting_up_the_builtin_build_process:
-
 ====================================
 Setting up the builtin build process
 ====================================

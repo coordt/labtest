@@ -74,6 +74,23 @@ A ``provider`` is the method of hosting the backing service you need. Right now 
 The ``service`` is the type of service to provision, such as MySQL, Redis, or ElasticSearch. Different providers can provision different services. Check out the :ref:`backing_services_providers` to see the options.
 
 
+``options``
+-----------
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``None``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - A mapping of options for the provider/service combination
+
+The ``options`` include all the configuration you need to provider state service offered by the provider. Details of the options available are described in the description of each service.
+
 .. _backing_services_provision_types:
 
 ``provision_type``

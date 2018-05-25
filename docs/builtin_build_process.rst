@@ -1,23 +1,21 @@
-.. _builtin_build_process:
-
 ======================
 Built-in build process
 ======================
 
-This process is meant to provide an easy way to get started with LabTest. It requires some :ref:`initial setup<setting_up_the_builtin_build_process>` to allow for easy code checkouts.
+This process is meant to provide an easy way to get started with LabTest. It requires some :ref:`initial setup<admin/setting_up_the_builtin_build:Setting up the builtin build process>` to allow for easy code checkouts.
 
 Configuration
 =============
 
 To use the built-in build process, you must set several configuration parameters.
 
-:ref:`build_provider_config_option` must be set to ``local``\ .
+:ref:`configuration:build_provider` must be set to ``local``\ .
 
-Set :ref:`code_repo_url_config_option` to the URL for your code repository.
+Set :ref:`configuration:code_repo_url` to the URL for your code repository.
 
-We'll discuss :ref:`app_build_image_config_option` and :ref:`app_build_command_config_option` in the next sections.
+We'll discuss :ref:`configuration:app_build_image` and :ref:`configuration:app_build_command` in the next sections.
 
-There is one optional parameter: :ref:`container_build_command_config_option` if you need different options for building the final image.
+There is one optional parameter: :ref:`configuration:container_build_command` if you need different options for building the final image.
 
 Build steps
 ===========
@@ -30,22 +28,18 @@ There are only three basic steps:
 
     The steps LabTest's built-in build system goes through to generate a Docker image.
 
-1. :ref:`builtin_build_check_out_code`.
-2. :ref:`builtin_build_build_the_application`.
-3. :ref:`builtin_build_build_the_docker_image`.
+1. :ref:`builtin_build_process:check out code`.
+2. :ref:`builtin_build_process:build the application`.
+3. :ref:`builtin_build_process:build the docker image`.
 
-
-.. _builtin_build_check_out_code:
 
 Check out code
 ==============
 
-This step performs a shallow clone of the repo specified in :ref:`code_repo_url_config_option`. It uses a machine user to make this process easy to manage, and requires :ref:`initial setup<setting_up_the_builtin_build_process>`.
+This step performs a shallow clone of the repo specified in :ref:`configuration:code_repo_url`. It uses a machine user to make this process easy to manage, and requires :ref:`initial setup<admin/setting_up_the_builtin_build:Setting up the builtin build process>`.
 
 When updates are requested, the cloned repository simply updates the code.
 
-
-.. _builtin_build_build_the_application:
 
 Build the application
 =====================
@@ -63,12 +57,10 @@ Docker containers are immutable; any changes made in the container are gone the 
 When we do this, changes made to the mounted directory within the container are made outside the container.
 
 
-.. _builtin_build_build_environment:
-
 Build environment
 -----------------
 
-The :ref:`app_build_image_config_option` setting specifies the Docker image to use as a build environment. This environment should have all the tools you need pre-installed. We suggest choosing one of Shippable's `publicly available images`_ that fits your environment.
+The :ref:`configuration:app_build_image` setting specifies the Docker image to use as a build environment. This environment should have all the tools you need pre-installed. We suggest choosing one of Shippable's `publicly available images`_ that fits your environment.
 
 .. table::
     :class: uk-table uk-table-striped uk-table-small
@@ -95,8 +87,6 @@ So for a node.js application, you would set ``app_build_image: drydock/u16nodall
 .. _publicly available images: http://docs.shippable.com/platform/runtime/machine-image/ami-overview/
 
 
-.. _builtin_build_build_command:
-
 Build command
 -------------
 
@@ -119,9 +109,7 @@ Results
 After LabTest runs your build command inside your build environment, everything should be ready to build the Docker image.
 
 
-.. _builtin_build_build_the_docker_image:
-
 Build the Docker image
 ======================
 
-To build the Docker image, LabTest runs the command specified in :ref:`container_build_command_config_option`\ . The default is usually fine. The image is stored on the Laboratory server, which makes running and updating it a bit faster.
+To build the Docker image, LabTest runs the command specified in :ref:`configuration:container_build_command`\ . The default is usually fine. The image is stored on the Laboratory server, which makes running and updating it a bit faster.

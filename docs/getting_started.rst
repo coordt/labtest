@@ -2,8 +2,6 @@
 Getting Started
 ===============
 
-.. _setting_up_your_local_machine:
-
 Setting up your local machine
 =============================
 
@@ -84,14 +82,14 @@ You can disconnect by typing :kbd:`control-d` or :kbd:`exit`.
 Getting your code ready
 =======================
 
-At this point, you may want to read the section on :ref:`how experiments work<how_it_works_experiments>` to understand the process in more depth. Ultimately we will need a Docker image and a configuration when we are done.
+At this point, you may want to read the section on :ref:`how experiments work<admin/how_it_works:experiments>` to understand the process in more depth. Ultimately we will need a Docker image and a configuration when we are done.
 
 Containerize it
 ---------------
 
 Each experiment runs in a Docker container and is configured via environment variables. If your app doesn't already have a ``Dockerfile`` and a way to build everything as a container, you need to adapt it.
 
-This topic is too broad to go into here, but the :ref:`Tutorial <tutorial_containerizing>` demonstrates a very simple conversion. You'll know you are ready when you can run something like:
+This topic is too broad to go into here, but the :ref:`Tutorial <tutorial:containerizing>` demonstrates a very simple conversion. You'll know you are ready when you can run something like:
 
 .. code-block:: console
 

@@ -85,8 +85,6 @@ When the Docker container for an experiment runs, it can tell nginx proxy to rou
 .. _test server template: https://github.com/CityOfBoston/labtest/blob/master/infrastructure/cloudformation/testserver.yaml
 
 
-.. _how_it_works_experiments:
-
 Experiments
 -----------
 
@@ -107,12 +105,12 @@ Typically the instance name is the same as the branch name, but they don't have 
 
 **Create experiment space.** The step creates a space to store files it might need. The space is at ``/testing/<app name>/<instance name>``\ .
 
-**Trigger build.** The result of this step is a compiled Docker image. Test Lab has a :ref:`built-in process <builtin_build_process>`\ , or you can use your own existing process that generates the image.
+**Trigger build.** The result of this step is a compiled Docker image. Test Lab has a :ref:`built-in process <builtin_build_process:Built-in build process>`\ , or you can use your own existing process that generates the image.
 
-**Create container from image.** There are two parts to this: creating an environment file and creating the container. The environment file is automatically generated from the values in :ref:`environment_config_option`, plus a few extras:
+**Create container from image.** There are two parts to this: creating an environment file and creating the container. The environment file is automatically generated from the values in :ref:`configuration:environment`, plus a few extras:
 
-- ``VIRTUAL_HOST`` is created from the :ref:`host_name_pattern_config_option` and :ref:`test_domain_config_option`\ .
-- ``APP_NAME`` is :ref:`app_name_config_option`\ .
+- ``VIRTUAL_HOST`` is created from the :ref:`configuration:host_name_pattern` and :ref:`configuration:test_domain`\ .
+- ``APP_NAME`` is :ref:`configuration:app_name`\ .
 - ``INSTANCE_NAME`` is name of the test instance.
 - ``BRANCH_NAME`` is name of the branch.
 
