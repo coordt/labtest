@@ -590,7 +590,7 @@ Resources:
               group: ec2-user
             /testing/state.json:
               content: !Sub |
-                {"provider": "s3", "bucket": "${StateBucketName}"}
+                {"provider": "aws", "service": "s3", "options": {"bucket": "${StateBucketName}"}}
               mode: '000664'
               owner: ec2-user
               group: docker
