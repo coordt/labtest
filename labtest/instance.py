@@ -358,6 +358,7 @@ def update_instance(name):
 
     _app_build()
     _image_build()
+    _setup_backing_services()
     _setup_templates()
     _update_container()
     services.start_service('{app_name}-{instance_name}'.format(**env), env.quiet)
