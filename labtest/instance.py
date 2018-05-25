@@ -355,6 +355,7 @@ def update_instance(name):
         'APP_NAME': env.app_name,
         'INSTANCE_NAME': env.instance_name,
     }
+    env.docker_image = env.docker_image_pattern % env.context
     _setup_path()
     _checkout_code()
 
