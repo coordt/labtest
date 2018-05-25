@@ -197,7 +197,7 @@ def _setup_templates():
                 contents.write(unicode(env.config.secrets.decrypt(match.group(2))))
                 contents.write(unicode(match.group(3)))
             else:
-            contents.write(u'{}\n'.format(item))
+                contents.write(u'{}\n'.format(item))
         for item in env.backing_service_configs.get('environment', []):
             match = encrypt_pattern.match(item)
             if match:
@@ -205,7 +205,7 @@ def _setup_templates():
                 contents.write(unicode(env.config.secrets.decrypt(match.group(2))))
                 contents.write(unicode(match.group(3)))
             else:
-            contents.write(u'{}\n'.format(item))
+                contents.write(u'{}\n'.format(item))
         with hide('running'):
             put(local_path=contents, remote_path=env_dest)
 
@@ -322,7 +322,7 @@ def create_instance(branch, name=''):
     systemd_template = os.path.join(os.path.dirname(__file__), 'templates', 'systemd-test.conf.template')
     services.setup_service(env.service_name, systemd_template, env.context, env.quiet)
     click.echo('')
-    click.secho('Your experiment is available at: {}'.format(env.virtual_host), fg='green')
+    click.secho('Your experiment is available at: http://{}'.format(env.virtual_host), fg='green')
 
 
 @task
