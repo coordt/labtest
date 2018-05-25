@@ -269,8 +269,8 @@ def destroy(config, name):
     services.delete_service(service_config['service_name'], env.quiet)
     _delete_container(service_config)
     _delete_volume(service_config)
-    run('docker prune volume -f', quiet=env.quiet)
-    run('docker prune container -f', quiet=env.quiet)
+    run('docker volume prune -f', quiet=env.quiet)
+    run('docker container prune -f', quiet=env.quiet)
 
 
 def check_config(config):
