@@ -349,6 +349,8 @@ def update_instance(name):
     env.instance_name = name
     env.app_path = '/testing/{app_name}'.format(**env)
     env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
+    env.service_name = '{app_name}-{instance_name}'.format(**env)
+    env.network_name = '{service_name}-net'.format(**env)
     env.context = {
         'APP_NAME': env.app_name,
         'INSTANCE_NAME': env.instance_name,
