@@ -9,8 +9,13 @@ service_providers = {
     'docker': docker.service_provider,
 }
 
-state_providers = {}
-state_providers.update(aws.state_provider)
+state_providers = {
+    'aws': aws.state_provider
+}
+
+secret_providers = {
+    'aws': aws.secret_provider
+}
 
 
 def check_services_config(services):
@@ -18,7 +23,9 @@ def check_services_config(services):
     Make sure the services are configured correctly
 
     Args:
-        services:  The services confgiuration
+        services:  The services confgiuration to check
+    Raises:
+        ClickException: If there is an error
     """
     for service_name, config in iteritems(services):
         if 'provider' not in config:
@@ -28,4 +35,4 @@ def check_services_config(services):
         if config['service'] not in service_providers[config['provider']]:
             raise click.ClickException('The {provider} provider doesn\'t have a registered service of "{service}".'.format(**config))
 
-__all__ = ['service_providers', 'state_providers', 'check_services_config']
+__all__ = ['secret_providers', 'service_providers', 'state_providers', 'check_services_config']
