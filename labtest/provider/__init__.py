@@ -3,6 +3,7 @@ from future.utils import iteritems
 import click
 from . import docker
 from . import aws
+from . import local
 
 
 service_providers = {
@@ -10,7 +11,8 @@ service_providers = {
 }
 
 state_providers = {
-    'aws': aws.state_provider
+    'aws': aws.state_provider,
+    'local': local.state_provider,
 }
 
 secret_providers = {
