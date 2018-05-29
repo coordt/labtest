@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1 (2018-05-29)
+
+[Fix] Actually merged the 0.4 branch this time.
+
 ## 0.4 (2018-05-29)
 
 ### New
