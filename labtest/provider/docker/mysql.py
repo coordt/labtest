@@ -129,6 +129,8 @@ def _setup_container(config):
 
     run(' '.join(cmd).format(**config), quiet=env.quiet)
 
+    del config['data_source_filename']
+
     # If the container existed before, we need to start it again
     if len(containers) > 0:
         click.echo('  Starting new container.')
@@ -177,12 +179,21 @@ def _has_config_changed(new_config):
             get(local_path=existing_config_buffer, remote_path=config_path)
         try:
             existing_config = json.loads(unicode(existing_config_buffer.getvalue()))
-            if new_config == existing_config:
-                click.echo('  Configuration for existing MySQL service is unchanged. Skipping.')
-                return False
-            else:
-                click.echo('  Configuration for existing MySQL service has changed. Re-creating it.')
+            key_diffs = set(new_config.keys()) ^ set(existing_config.keys())
+            if len(key_diffs):
+                click.echo('  Configuration for existing MySQL service has different options from the new configuration.')
+                for i in key_diffs:
+                    click.echo('    - {}'.format(i))
+                click.echo('  Re-creating it.')
                 return True
+            for key, val in new_config.items():
+                if existing_config[key] != val:
+                    click.echo('  Configuration for existing MySQL service has changed.')
+                    click.echo('    {} was {} now {}'.format(key, existing_config[key], val))
+                    click.echo('  Re-creating it.')
+                    return True
+            click.echo('  Configuration for existing MySQL service is unchanged. Skipping.')
+            return False
         except Exception as e:
             click.echo('  Error: {}'.format(e))
             click.echo('  Configuration for existing MySQL service is unreadable. Re-creating it.')
