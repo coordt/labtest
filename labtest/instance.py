@@ -156,7 +156,7 @@ def _setup_network():
     """
     Create a network for this experiment, if necessary
     """
-    networks = run('docker network ls --filter name={network_name} --format "{{{{.ID}}}}"'.format(**env))
+    networks = run('docker network ls --filter name={network_name} --format "{{{{.ID}}}}"'.format(**env), quiet=env.quiet)
     if len(networks) == 0:
         click.echo('Setting up networking.')
         run('docker network create --driver bridge {network_name}'.format(**env), quiet=env.quiet)
@@ -167,7 +167,7 @@ def _delete_network():
     """
     Delete the network for this experiment, if necessary
     """
-    networks = run('docker network ls --filter name={network_name} --format "{{{{.ID}}}}"'.format(**env))
+    networks = run('docker network ls --filter name={network_name} --format "{{{{.ID}}}}"'.format(**env), quiet=env.quiet)
     if len(networks) != 0:
         click.echo('Removing network.')
         run('docker network disconnect {network_name} nginx_proxy'.format(**env), quiet=env.quiet)
@@ -218,8 +218,7 @@ def _update_container():
     # Delete the container if it exists
     cmd = [
         'docker ps -a',
-        '--filter name={service_name}',
-        '--filter ancestor={docker_image}',
+        '--filter name={container_name}',
         '--format "{{{{.ID}}}}"'
     ]
     containers = run(' '.join(cmd).format(**env), quiet=env.quiet)
@@ -227,12 +226,12 @@ def _update_container():
         click.echo('Removing the existing container.')
         with settings(warn_only=True):
             sudo('systemctl stop {service_name}'.format(**env), quiet=env.quiet)
-        run('docker rm -f {service_name}'.format(**env), quiet=env.quiet)
+        run('docker rm -f {container_name}'.format(**env), quiet=env.quiet)
 
     cmd = [
         'docker create',
         '--env-file {instance_path}/test.env',
-        '--name {service_name}',
+        '--name {container_name}',
         '--network {network_name}',
     ]
 
@@ -277,6 +276,7 @@ def _setup_default_env(instance_name, branch_name=''):
     env.app_path = '/testing/{app_name}'.format(**env)
     env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
     env.service_name = '{app_name}-{instance_name}'.format(**env)
+    env.container_name = '{service_name}-code'.format(**env)
     env.network_name = '{service_name}-net'.format(**env)
     env.context = {
         'APP_NAME': env.app_name,
@@ -348,13 +348,12 @@ def delete_instance(name):
 
     cmd = [
         'docker ps -a',
-        '--filter name={service_name}',
-        '--filter ancestor={docker_image}',
+        '--filter name={container_name}',
         '--format "{{{{.ID}}}}"'
     ]
     containers = run(' '.join(cmd).format(**env), quiet=env.quiet)
     if len(containers) > 0:
-        run('docker rm -f {service_name}'.format(**env), quiet=env.quiet)
+        run('docker rm -f {container_name}'.format(**env), quiet=env.quiet)
 
     env.docker_image = env.docker_image_pattern % env.context
     images = run('docker image ls {docker_image} -q'.format(**env), quiet=env.quiet)
@@ -381,7 +380,7 @@ def update_instance(name):
     _setup_backing_services()
     _setup_templates()
     _update_container()
-    services.start_service('{app_name}-{instance_name}'.format(**env), env.quiet)
+    services.start_service('{service_name}'.format(**env), env.quiet)
     click.echo('')
     click.secho('Your experiment updated and available at: http://{}'.format(env.virtual_host), fg='green')
 

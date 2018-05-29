@@ -234,37 +234,37 @@ def test_setup_templates():
 
 def test_update_container():
     responses = {
-        '/bin/bash -l -c "docker ps -a --filter name=testapp-testinstance --filter ancestor=testapp/testinstance:latest --format \\"{{.ID}}\\""': '',
-        '/bin/bash -l -c "docker create --env-file /testing/testapp/testinstance/test.env --name testapp-testinstance --network testapp-testinstance-net testapp/testinstance:latest"': '',
+        '/bin/bash -l -c "docker ps -a --filter name=testapp-testinstance-code --format \\"{{.ID}}\\""': '',
+        '/bin/bash -l -c "docker create --env-file /testing/testapp/testinstance/test.env --name testapp-testinstance-code --network testapp-testinstance-net testapp/testinstance:latest"': '',
     }
     env = {}
     files = {}
     expected = (
-        '[{host}] run: docker ps -a --filter name=testapp-testinstance --filter ancestor=testapp/testinstance:latest --format "{{{{.ID}}}}"\n'
+        '[{host}] run: docker ps -a --filter name=testapp-testinstance-code --format "{{{{.ID}}}}"\n'
         'Creating the Docker container.\n'
-        '[{host}] run: docker create --env-file /testing/testapp/testinstance/test.env --name testapp-testinstance --network testapp-testinstance-net testapp/testinstance:latest\n'
+        '[{host}] run: docker create --env-file /testing/testapp/testinstance/test.env --name testapp-testinstance-code --network testapp-testinstance-net testapp/testinstance:latest\n'
     )
     run_fabric_command(instance._update_container, responses, expected, files, env)
 
 
 def test_update_container_container_exists():
     responses = {
-        '/bin/bash -l -c "docker ps -a --filter name=testapp-testinstance --filter ancestor=testapp/testinstance:latest --format \\"{{.ID}}\\""': '12345',
+        '/bin/bash -l -c "docker ps -a --filter name=testapp-testinstance-code --format \\"{{.ID}}\\""': '12345',
         'sudo -S -p \'sudo password:\'  /bin/bash -l -c "systemctl stop testapp-testinstance"': '',
         'sudo -S -p \'sudo password:\'  /bin/bash -l -c "systemctl start testapp-testinstance"': '',
-        '/bin/bash -l -c "docker create --env-file /testing/testapp/testinstance/test.env --name testapp-testinstance --network testapp-testinstance-net testapp/testinstance:latest"': '',
-        '/bin/bash -l -c "docker rm -f testapp-testinstance"': '',
+        '/bin/bash -l -c "docker create --env-file /testing/testapp/testinstance/test.env --name testapp-testinstance-code --network testapp-testinstance-net testapp/testinstance:latest"': '',
+        '/bin/bash -l -c "docker rm -f testapp-testinstance-code"': '',
     }
     env = {}
     files = {}
     expected = (
-        '[{host}] run: docker ps -a --filter name=testapp-testinstance --filter ancestor=testapp/testinstance:latest --format "{{{{.ID}}}}"\n'
+        '[{host}] run: docker ps -a --filter name=testapp-testinstance-code --format "{{{{.ID}}}}"\n'
         '[{host}] out: 12345\n'
         'Removing the existing container.\n'
         '[{host}] sudo: systemctl stop testapp-testinstance\n'
-        '[{host}] run: docker rm -f testapp-testinstance\n'
+        '[{host}] run: docker rm -f testapp-testinstance-code\n'
         'Creating the Docker container.\n'
-        '[{host}] run: docker create --env-file /testing/testapp/testinstance/test.env --name testapp-testinstance --network testapp-testinstance-net testapp/testinstance:latest\n'
+        '[{host}] run: docker create --env-file /testing/testapp/testinstance/test.env --name testapp-testinstance-code --network testapp-testinstance-net testapp/testinstance:latest\n'
         'Starting the new container.\n'
         '[{host}] sudo: systemctl start testapp-testinstance\n'
     )
