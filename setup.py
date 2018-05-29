@@ -22,7 +22,7 @@ test_requirements = [
 
 setup(
     name='labtest',
-    version='0.3.5',
+    version='0.4.0',
     description="Build an isolated test lab for running software in containers.",
     long_description=readme + '\n\n' + history,
     author="Corey Oordt",
