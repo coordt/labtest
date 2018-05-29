@@ -263,17 +263,34 @@ def _setup_env_with_config(config):
     env.quiet = not config.verbose
 
 
-@task
-def test_task():
-    env.instance_name = 'labtest'
-    env.branch_name = 'labtest'
+def _setup_default_env(instance_name, branch_name=''):
+    """
+    Provide a basic setup of the env for values needed throughout the code
+
+    Assumes ``app_name`` is already set.
+
+    Args:
+        instance_name: The name of the instance we are dealing with
+        branch_name: If we know it, include it. This is not guaranteed
+    """
+    env.instance_name = instance_name
     env.app_path = '/testing/{app_name}'.format(**env)
     env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
+    env.service_name = '{app_name}-{instance_name}'.format(**env)
+    env.network_name = '{service_name}-net'.format(**env)
     env.context = {
         'APP_NAME': env.app_name,
         'INSTANCE_NAME': env.instance_name,
-        'BRANCH_NAME': env.branch_name
     }
+    if branch_name:
+        env.branch_name = branch_name
+        env.context['BRANCH_NAME'] = branch_name
+    env.docker_image = env.docker_image_pattern % env.context
+
+
+@task
+def test_task():
+    _setup_default_env('labtest', 'labtest')
     # _setup_path()
     print "Starting string to encrypt"
     pt = 'This is my secret. Keep it safe'
@@ -293,18 +310,8 @@ def create_instance(branch, name=''):
     """
     if not name:
         name = branch
-    env.instance_name = name
-    env.branch_name = branch
-    env.app_path = '/testing/{app_name}'.format(**env)
-    env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
-    env.service_name = '{app_name}-{instance_name}'.format(**env)
-    env.network_name = '{service_name}-net'.format(**env)
-    env.context = {
-        'APP_NAME': env.app_name,
-        'INSTANCE_NAME': env.instance_name,
-        'BRANCH_NAME': env.branch_name
-    }
-    env.docker_image = env.docker_image_pattern % env.context
+    _setup_default_env(name, branch)
+
     _setup_path()
     _checkout_code()
 
@@ -332,16 +339,8 @@ def delete_instance(name):
     """
     The Fabric task to delete an instance
     """
-    env.instance_name = name
-    env.app_path = '/testing/{app_name}'.format(**env)
-    env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
-    env.service_name = '{app_name}-{instance_name}'.format(**env)
-    env.network_name = '{service_name}-net'.format(**env)
-    env.context = {
-        'APP_NAME': env.app_name,
-        'INSTANCE_NAME': env.instance_name,
-    }
-    env.docker_image = env.docker_image_pattern % env.context
+    _setup_default_env(name)
+
     _remove_path()
     services.delete_service(env.service_name, env.quiet)
     run('docker container prune -f', quiet=env.quiet)
@@ -371,16 +370,7 @@ def update_instance(name):
     """
     The Fabric task to update an instance
     """
-    env.instance_name = name
-    env.app_path = '/testing/{app_name}'.format(**env)
-    env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
-    env.service_name = '{app_name}-{instance_name}'.format(**env)
-    env.network_name = '{service_name}-net'.format(**env)
-    env.context = {
-        'APP_NAME': env.app_name,
-        'INSTANCE_NAME': env.instance_name,
-    }
-    env.docker_image = env.docker_image_pattern % env.context
+    _setup_default_env(name)
     _setup_path()
     _checkout_code()
 
