@@ -171,14 +171,14 @@ class Config(object):
         Read a configuration from an INI file
         """
         import os
-        import configparser
+        from ConfigParser import ConfigParser
 
         if not os.path.exists(filepath):
             raise IOError()
-        configparser = configparser.ConfigParser()
-        configparser.read([filepath])
-        if self.namespace in configparser.sections():
-            for key, val in configparser.items(self.namespace):
+        cfgparser = ConfigParser()
+        cfgparser.read([filepath])
+        if self.namespace in cfgparser.sections():
+            for key, val in cfgparser.items(self.namespace):
                 setattr(self, key, val)
 
     def read_json_config(self, filepath):
