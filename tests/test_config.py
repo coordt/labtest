@@ -10,8 +10,19 @@ Tests for `config` module.
 import os
 import pytest
 from labtest import config
+from labtest import cli
+import click
+from click.testing import CliRunner
 
 FIXTURE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), 'fixtures'))
+
+
+def test_check_config():
+    config = os.path.join(FIXTURE_DIR, 'config.yml')
+    runner = CliRunner()
+    result = runner.invoke(cli.main, ['-c', config, 'check-config', ])
+    assert result.exit_code == 0
+    assert 'The configuration is valid' in result.output
 
 
 def check_config_result(config):
@@ -125,3 +136,106 @@ def test_overrides():
     assert c.host == kw_overrides['host']
     assert c.use_ssh_config == kw_overrides['use_ssh_config']
     assert c.provider == kw_overrides['provider']
+
+
+def test_use_ssh_config():
+    c = config.get_config(os.path.join(FIXTURE_DIR, 'config.yml'))
+    c.use_ssh_config = True
+    assert c.use_ssh_config is True
+    c.use_ssh_config = 1.5
+    assert c.use_ssh_config is False
+
+
+def test_get_state():
+    from .fabric_runner import run_fabric_command
+    from labtest.provider.local.state import ScriptState
+    import random
+    port = random.randint(1024, 49151)
+
+    responses = {
+        '/bin/bash -l -c "echo \\"Will you echo quotation marks\\""': 'Will you echo quotation marks',
+        '/bin/bash -l -c "stat \\"\\$(echo /testing/state.json)\\""': 'foo',
+    }
+    env = {}
+    files = {
+        '/testing/state.json': '{"provider": "local", "service": "script", "options": {"command": "/testing/bin/get-state"}}',
+    }
+    expected = ''
+    c = config.get_config(os.path.join(FIXTURE_DIR, 'config.yml'), host='username@127.0.0.1:{}'.format(port))
+    response = run_fabric_command(c.get_state, responses, expected, files, env, port=port)
+    assert isinstance(response, ScriptState)
+
+
+def test_get_state_malformed():
+    from .fabric_runner import run_fabric_command
+    import random
+    port = random.randint(1024, 49151)
+
+    responses = {
+        '/bin/bash -l -c "echo \\"Will you echo quotation marks\\""': 'Will you echo quotation marks',
+        '/bin/bash -l -c "stat \\"\\$(echo /testing/state.json)\\""': 'foo',
+    }
+    env = {}
+    files = {
+        '/testing/state.json': 'asdfasdfasdf',
+    }
+    expected = ''
+    c = config.get_config(os.path.join(FIXTURE_DIR, 'config.yml'), host='username@127.0.0.1:{}'.format(port))
+
+    with pytest.raises(click.ClickException):
+        run_fabric_command(c.get_state, responses, expected, files, env, port=port)
+
+
+def test_get_state_no_provider():
+    from .fabric_runner import run_fabric_command
+    import random
+    port = random.randint(1024, 49151)
+
+    responses = {
+        '/bin/bash -l -c "echo \\"Will you echo quotation marks\\""': 'Will you echo quotation marks',
+        '/bin/bash -l -c "stat \\"\\$(echo /testing/state.json)\\""': 'foo',
+    }
+    env = {}
+    files = {
+        '/testing/state.json': '{"provider": "foo", "service": "script", "options": {"command": "/testing/bin/get-state"}}',
+    }
+    expected = ''
+    c = config.get_config(os.path.join(FIXTURE_DIR, 'config.yml'), host='username@127.0.0.1:{}'.format(port))
+    with pytest.raises(click.ClickException):
+        run_fabric_command(c.get_state, responses, expected, files, env, port=port)
+
+
+def test_get_state_no_service():
+    from .fabric_runner import run_fabric_command
+    import random
+    port = random.randint(1024, 49151)
+
+    responses = {
+        '/bin/bash -l -c "echo \\"Will you echo quotation marks\\""': 'Will you echo quotation marks',
+        '/bin/bash -l -c "stat \\"\\$(echo /testing/state.json)\\""': 'foo',
+    }
+    env = {}
+    files = {
+        '/testing/state.json': '{"provider": "local", "service": "foo", "options": {"command": "/testing/bin/get-state"}}',
+    }
+    expected = ''
+    c = config.get_config(os.path.join(FIXTURE_DIR, 'config.yml'), host='username@127.0.0.1:{}'.format(port))
+    with pytest.raises(click.ClickException):
+        run_fabric_command(c.get_state, responses, expected, files, env, port=port)
+
+
+def test_get_state_none():
+    from .fabric_runner import run_fabric_command
+    import random
+    port = random.randint(1024, 49151)
+
+    responses = {
+        '/bin/bash -l -c "echo \\"Will you echo quotation marks\\""': 'Will you echo quotation marks',
+        '/bin/bash -l -c "stat \\"\\$(echo /testing/state.json)\\""': ('', 'doesn\'t exist', 1),
+    }
+    env = {}
+    files = {}
+    expected = ''
+    c = config.get_config(os.path.join(FIXTURE_DIR, 'config.yml'), host='username@127.0.0.1:{}'.format(port))
+    response = run_fabric_command(c.get_state, responses, expected, files, env, port=port)
+    assert response is None
