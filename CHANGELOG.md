@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.3 (2018-05-29)
+
+### Fix
+
+* Changed the name of the container in the systemd template. [Corey Oordt]
+
+
 ## 0.4.2 (2018-05-29)
 
 ### Updates
