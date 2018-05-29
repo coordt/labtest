@@ -198,6 +198,7 @@ def _setup_templates():
                 contents.write(unicode(match.group(3)))
             else:
                 contents.write(u'{}\n'.format(item))
+        if 'backing_service_configs' in env:
         for item in env.backing_service_configs.get('environment', []):
             match = encrypt_pattern.match(item)
             if match:
@@ -236,6 +237,7 @@ def _update_container():
     ]
 
     # Note that the enviornment variables were added in _setup_templates
+    if 'backing_service_configs' in env:
     for host in env.backing_service_configs.get('hosts', []):
         cmd.append('--add-host {}'.format(host))
 
