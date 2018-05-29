@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.2 (2018-05-29)
+
+### Updates
+
+* Changed the naming convention of the code container to allow for easier container manipulation. [Corey Oordt]
+
+### Fix
+
+* Changed the import from providers to service_providers when deleting an experiment. [Corey Oordt]
+
+* Changed the import of ConfigParser for python 2.7. [Corey Oordt]
+
+
 ## 0.4.1 (2018-05-29)
 
 [Fix] Actually merged the 0.4 branch this time.
