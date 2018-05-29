@@ -48,15 +48,18 @@ class LabTestConfig(Config):
     ]
     namespace = 'labtest'
     required_attrs = [
-        'host',
+        'app_build_command',
+        'app_build_image',
         'app_name',
-        'test_domain',
-        'container_provider',
         'build_provider',
-        'host_name_pattern',
-        'environment',
+        'container_provider',
         'docker_image_pattern',
+        'environment',
+        'host',
+        'host_name_pattern',
         'services',
+        'test_domain',
+        'verbose',
     ]
     dependencies = {
         'build_provider': {
@@ -183,6 +186,9 @@ class LabTestConfig(Config):
     def get_default_use_ssh_config(self):
         return False
 
+    def get_default_verbose(self):
+        return False
+
     def validate_dependencies(self):
         """
         Make sure extra options are set, if necessary
@@ -227,8 +233,7 @@ def _format_config(val, key='', indent=0, indent_amt=2):
     recursive dict/list formatter
     """
     spaces = ' ' * indent * indent_amt
-    if indent > 10:
-        click.ClickException('WHATSGOINGON!')
+
     if isinstance(val, (list, tuple)):
         if key:
             click.echo(spaces, nl=False)
