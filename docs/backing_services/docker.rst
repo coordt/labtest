@@ -2,7 +2,7 @@
 Docker service provider
 =======================
 
-Docker can provision basic services in containers that are secure and independent.
+Docker can provision basic services in containers that are secure and independent. They all have their ``provider`` set to ``docker``\ .
 
 Databases
 =========
@@ -10,7 +10,20 @@ Databases
 MySQL
 -----
 
-This service accepts several additional parameters
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Provider:
+      - ``docker``
+    * - Service:
+      - ``mysql``
+    * - Provision types:
+      - ``independent`` or ``shared``
+    * - Options:
+      - :ref:`docker:initial_data_source`, :ref:`docker:image`, :ref:`docker:commands`, and :ref:`docker:environment`
+
 
 .. code-block:: yaml
     :caption: Specifying a MySQL database backing service in the configuration
@@ -31,23 +44,8 @@ This service accepts several additional parameters
               - "MYSQL_ALLOW_EMPTY_PASSWORD=true"
               - "MYSQL_DATABASE=drupal"
 
-``options``
-~~~~~~~~~~~
 
-.. list-table::
-    :class: uk-table uk-table-striped uk-table-small
-    :widths: 33 64
-    :stub-columns: 1
-
-    * - Default:
-      - ``None``
-    * - Required:
-      - ``False``
-    * - Acceptable values:
-      - A mapping of options specified below
-
-The ``options`` include all the configuration you need to make for the ``mysql`` service. Details of the options are described below.
-
+.. _docker:initial_data_source:
 
 ``initial_data_source``
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,6 +66,7 @@ This parameter uses the default database restoration tool for the database type 
 
 You will need to specify the ``MYSQL_DATABASE=<value>`` ``environment`` variable as well.
 
+.. _docker:image:
 
 ``image``
 ~~~~~~~~~
@@ -93,6 +92,8 @@ This is the MySQL Docker image to use for the service.
 .. _official MySQL Docker image: https://hub.docker.com/_/mysql/
 
 
+.. _docker:commands:
+
 ``commands``
 ~~~~~~~~~~~~
 
@@ -110,6 +111,8 @@ This is the MySQL Docker image to use for the service.
 
 Many configuration options can be passed as flags to ``mysqld``\ . This is a list of the strings to pass to ``mysqld``\ . See the section "Configuration without a cnf file" on the `official MySQL Docker image`_ page.
 
+
+.. _docker:environment:
 
 ``environment``
 ~~~~~~~~~~~~~~~

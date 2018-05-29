@@ -102,9 +102,9 @@ def _put_docker_build_cmd():
     contents = StringIO()
     contents.write(str(open(base_file, 'r').read()))
     contents.write(str(env.container_build_command))
-    with hide('running'):
+    with settings(hide('running'), warn_only=True):
         with cd(env.instance_path):
-            result = put(local_path=contents, remote_path='docker-build', mode=0o755)
+            result = put(local_path=contents, remote_path='docker-build', mode=0o775)
     if result.failed:
         click.ClickException('Failed to put the docker-build command on remote host.')
 
@@ -125,12 +125,12 @@ def _setup_backing_services():
     create them
     """
     from itertools import chain
-    from provider import providers, check_services_config
+    from provider import service_providers, check_services_config
 
     check_services_config(env.services)
     additional_configs = []
     for service_name, config in iteritems(env.services):
-        service = providers[config['provider']][config['service']]
+        service = service_providers[config['provider']][config['service']]
         additional_configs.append(service.create(config, service_name))
 
     # De-dupe the additional configs
@@ -178,7 +178,9 @@ def _setup_templates():
     """
     Write the templates to the appropriate places
     """
+    import re
     from io import StringIO
+    encrypt_pattern = re.compile(r'^(.*)ENC\[([A-Za-z0-9+=/]+)\](.*)$')
 
     env_dest = u'{instance_path}/test.env'.format(**env)
     click.echo('Writing the experiment\'s environment file.')
@@ -189,9 +191,22 @@ def _setup_templates():
         for key, val in iteritems(env.context):
             contents.write(u'{}={}\n'.format(key, val))
         for item in env.environment:
-            contents.write(u'{}\n'.format(item))
-        for item in env.backing_service_configs.get('environment', []):
-            contents.write(u'{}\n'.format(item))
+            match = encrypt_pattern.match(item)
+            if match:
+                contents.write(unicode(match.group(1)))
+                contents.write(unicode(env.config.secrets.decrypt(match.group(2))))
+                contents.write(unicode(match.group(3)))
+            else:
+                contents.write(u'{}\n'.format(item))
+        if 'backing_service_configs' in env:
+            for item in env.backing_service_configs.get('environment', []):
+                match = encrypt_pattern.match(item)
+                if match:
+                    contents.write(unicode(match.group(1)))
+                    contents.write(unicode(env.config.secrets.decrypt(match.group(2))))
+                    contents.write(unicode(match.group(3)))
+                else:
+                    contents.write(u'{}\n'.format(item))
         with hide('running'):
             put(local_path=contents, remote_path=env_dest)
 
@@ -222,8 +237,9 @@ def _update_container():
     ]
 
     # Note that the enviornment variables were added in _setup_templates
-    for host in env.backing_service_configs.get('hosts', []):
-        cmd.append('--add-host {}'.format(host))
+    if 'backing_service_configs' in env:
+        for host in env.backing_service_configs.get('hosts', []):
+            cmd.append('--add-host {}'.format(host))
 
     cmd.append('{docker_image}')
 
@@ -241,24 +257,50 @@ def _setup_env_with_config(config):
     """
     Add config keys to the env
     """
+    env.config = config
     for key, val in iteritems(config.config):
         setattr(env, key, val)
     env.quiet = not config.verbose
 
 
-@task
-def test_task():
-    env.instance_name = 'labtest'
-    env.branch_name = 'labtest'
+def _setup_default_env(instance_name, branch_name=''):
+    """
+    Provide a basic setup of the env for values needed throughout the code
+
+    Assumes ``app_name`` is already set.
+
+    Args:
+        instance_name: The name of the instance we are dealing with
+        branch_name: If we know it, include it. This is not guaranteed
+    """
+    env.instance_name = instance_name
     env.app_path = '/testing/{app_name}'.format(**env)
     env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
+    env.service_name = '{app_name}-{instance_name}'.format(**env)
+    env.network_name = '{service_name}-net'.format(**env)
     env.context = {
         'APP_NAME': env.app_name,
         'INSTANCE_NAME': env.instance_name,
-        'BRANCH_NAME': env.branch_name
     }
-    _setup_path()
-    _setup_backing_services()
+    if branch_name:
+        env.branch_name = branch_name
+        env.context['BRANCH_NAME'] = branch_name
+    env.docker_image = env.docker_image_pattern % env.context
+
+
+@task
+def test_task():
+    _setup_default_env('labtest', 'labtest')
+    # _setup_path()
+    print "Starting string to encrypt"
+    pt = 'This is my secret. Keep it safe'
+    print pt
+    ct = env.config.secrets.encrypt(pt)
+    print 'Ciphertext:'
+    print ct
+    new_pt = env.config.secrets.decrypt(ct)
+    print 'Decrypted ciphertext'
+    print new_pt
 
 
 @task
@@ -268,18 +310,8 @@ def create_instance(branch, name=''):
     """
     if not name:
         name = branch
-    env.instance_name = name
-    env.branch_name = branch
-    env.app_path = '/testing/{app_name}'.format(**env)
-    env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
-    env.service_name = '{app_name}-{instance_name}'.format(**env)
-    env.network_name = '{service_name}-net'.format(**env)
-    env.context = {
-        'APP_NAME': env.app_name,
-        'INSTANCE_NAME': env.instance_name,
-        'BRANCH_NAME': env.branch_name
-    }
-    env.docker_image = env.docker_image_pattern % env.context
+    _setup_default_env(name, branch)
+
     _setup_path()
     _checkout_code()
 
@@ -299,7 +331,7 @@ def create_instance(branch, name=''):
     systemd_template = os.path.join(os.path.dirname(__file__), 'templates', 'systemd-test.conf.template')
     services.setup_service(env.service_name, systemd_template, env.context, env.quiet)
     click.echo('')
-    click.secho('Your experiment is available at: {}'.format(env.virtual_host), fg='green')
+    click.secho('Your experiment is available at: http://{}'.format(env.virtual_host), fg='green')
 
 
 @task
@@ -307,16 +339,8 @@ def delete_instance(name):
     """
     The Fabric task to delete an instance
     """
-    env.instance_name = name
-    env.app_path = '/testing/{app_name}'.format(**env)
-    env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
-    env.service_name = '{app_name}-{instance_name}'.format(**env)
-    env.network_name = '{service_name}-net'.format(**env)
-    env.context = {
-        'APP_NAME': env.app_name,
-        'INSTANCE_NAME': env.instance_name,
-    }
-    env.docker_image = env.docker_image_pattern % env.context
+    _setup_default_env(name)
+
     _remove_path()
     services.delete_service(env.service_name, env.quiet)
     run('docker container prune -f', quiet=env.quiet)
@@ -339,6 +363,8 @@ def delete_instance(name):
 
     _delete_backing_services()
     _delete_network()
+    click.echo('')
+    click.secho('Your experiment has been deleted.', fg='green')
 
 
 @task
@@ -346,16 +372,7 @@ def update_instance(name):
     """
     The Fabric task to update an instance
     """
-    env.instance_name = name
-    env.app_path = '/testing/{app_name}'.format(**env)
-    env.instance_path = '/testing/{app_name}/{instance_name}'.format(**env)
-    env.service_name = '{app_name}-{instance_name}'.format(**env)
-    env.network_name = '{service_name}-net'.format(**env)
-    env.context = {
-        'APP_NAME': env.app_name,
-        'INSTANCE_NAME': env.instance_name,
-    }
-    env.docker_image = env.docker_image_pattern % env.context
+    _setup_default_env(name)
     _setup_path()
     _checkout_code()
 
@@ -365,14 +382,14 @@ def update_instance(name):
     _setup_templates()
     _update_container()
     services.start_service('{app_name}-{instance_name}'.format(**env), env.quiet)
+    click.echo('')
+    click.secho('Your experiment updated and available at: http://{}'.format(env.virtual_host), fg='green')
 
 
 @task
 def list_instances(app_name=''):
     """
-    @brief      return a list of test instances on the server
-
-    @return     outputs the list to the console
+    Return a list of test instances on the server
     """
     if app_name:
         find_cmd = 'find /testing/{}/ -mindepth 1 -maxdepth 1 -type d -print '.format(app_name)
@@ -431,7 +448,7 @@ def list(ctx, app_name):
 @click.pass_context
 def test(ctx):
     """
-    Delete a test instance on the server
+    for testing
     """
     _setup_env_with_config(ctx.obj)
     execute(test_task, hosts=ctx.obj.host)

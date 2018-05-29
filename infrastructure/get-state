@@ -1,0 +1,37 @@
+#!/bin/bash
+
+STATE_PATH=/testing/labteststate
+STATE_FILE=""
+
+search_up() {
+    # 1. look for exact match
+    # 2. Add /default to the end
+    # 3. Loop until getting to STATE_PATH:
+    #    Check for existence
+    #    go up a level and add /default
+    LOOK=${STATE_PATH%/}/${1#/}
+    local TOP=${STATE_PATH%/}
+    if [[ -f $LOOK ]]
+    then
+        STATE_FILE=$LOOK
+        return
+    fi
+    while [[ $LOOK != $TOP ]]; do
+        LOOK=${LOOK%/}/default
+        if [[ -f $LOOK ]]
+        then
+            STATE_FILE=$LOOK
+            return
+        fi
+        LOOK=${LOOK%/*/default}
+    done
+    STATE_FILE=""
+    return
+}
+
+search_up "$1"
+
+if [[ -n $STATE_FILE ]]
+then
+    cat $STATE_FILE
+fi

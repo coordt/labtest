@@ -4,7 +4,7 @@ A collection of common functions to setup and destroy OS services
 """
 from fabric.api import run, sudo
 from fabric.contrib.files import upload_template, exists
-from fabric.context_managers import hide
+from fabric.context_managers import hide, settings
 import click
 
 
@@ -12,11 +12,13 @@ def start_service(service_name, quiet=False):
     """
     Make sure the service is running
     """
-    status = run('systemctl is-active {}'.format(service_name), quiet=quiet)
+    with settings(warn_only=True):
+        status = run('systemctl is-active {}'.format(service_name), quiet=quiet)
+    status = status.strip()
     if status == 'inactive':
         sudo('systemctl start {}'.format(service_name), quiet=quiet)
-    elif status == 'unknown':
-        click.ClickException(click.style('There was an issue starting the service. The test server doesn\'t recognize it.'), fg='red')
+    elif status != 'active':
+        raise click.ClickException(click.style('There was an issue starting the service. The test server doesn\'t recognize it.', fg='red'))
 
 
 def delete_service(service_name, quiet=False):

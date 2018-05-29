@@ -20,6 +20,22 @@ labtest.provider.aws.repository module
     :undoc-members:
     :show-inheritance:
 
+labtest.provider.aws.secrets module
+-----------------------------------
+
+.. automodule:: labtest.provider.aws.secrets
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+labtest.provider.aws.state module
+---------------------------------
+
+.. automodule:: labtest.provider.aws.state
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

@@ -35,6 +35,14 @@ labtest.configobj module
     :undoc-members:
     :show-inheritance:
 
+labtest.filesystem module
+-------------------------
+
+.. automodule:: labtest.filesystem
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 labtest.instance module
 -----------------------
 

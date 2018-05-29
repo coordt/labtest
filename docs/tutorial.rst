@@ -2,9 +2,8 @@
 Tutorial: Converting a project to use Lab Test
 ==============================================
 
-We are going to convert a Vue.js component for use with LabTest. This tutorial assumes that the test environment or laboratory is already set up, and you have :ref:`set up your local machine <setting_up_your_local_machine>`.
+We are going to convert a Vue.js component for use with LabTest. This tutorial assumes that the test environment or laboratory is already set up, and you have :ref:`set up your local machine <getting_started:setting up your local machine>`.
 
-.. _tutorial_containerizing:
 
 Containerizing
 ==============
@@ -114,7 +113,7 @@ We know that Lab Test can build a Docker image from our code. Before Lab Test ca
 
 We need two things: a *build image* and a *build command.*
 
-To build the components, Lab Test checks out the code (using :ref:`code_repo_url_config_option`), runs the *build image* and mounts the code directory to the ``/build/`` directory inside the container. Lab Test runs the *build command*  inside the *build image,* not affecting anything else on the server. However, anything done to the ``/build/`` directory passes through to the Test Server file system.
+To build the components, Lab Test checks out the code (using :ref:`configuration:code_repo_url`), runs the *build image* and mounts the code directory to the ``/build/`` directory inside the container. Lab Test runs the *build command*  inside the *build image,* not affecting anything else on the server. However, anything done to the ``/build/`` directory passes through to the Test Server file system.
 
 
 Build image
@@ -281,7 +280,7 @@ We can create an experiment but running ``labtest create <branchname>``\ . We'll
 
     Your experiment is available at: vizwiz-foo.digital-test.boston.gov
 
-**Success!!** Our experiment is available at ``vizwiz-labtest.digital-test.boston.gov``\ . Each experiment's URL is created using the template ``<app_name>-<instance_name>.<test_domain>``\ , although you can configure this via :ref:`host_name_pattern_config_option`.
+**Success!!** Our experiment is available at ``vizwiz-labtest.digital-test.boston.gov``\ . Each experiment's URL is created using the template ``<app_name>-<instance_name>.<test_domain>``\ , although you can configure this via :ref:`configuration:host_name_pattern`.
 
 .. note::
 

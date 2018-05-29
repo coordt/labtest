@@ -1,6 +1,9 @@
-=============
-Configuration
-=============
+========================
+Experiment Configuration
+========================
+
+In order for LabTest to create an experiment, it needs a little bit of information about your project. LabTest :ref:`requires <configuration:required configuration options>` very little configuration, but allows for lots of :ref:`customization <configuration:optional configuration options>`\ .
+
 
 Automatic configuration files
 =============================
@@ -31,13 +34,14 @@ You can alternatively pass the configuration file to Lab Test at the command lin
    :language: json
    :caption: Example ``.json`` configuration
 
+.. _configuration_required_options:
 
 Required configuration options
 ==============================
 
 There are several options that are required in order for Lab Test to work correctly.
 
-.. _host_config_option:
+.. _configuration:host:
 
 ``host``
 --------
@@ -57,7 +61,7 @@ There are several options that are required in order for Lab Test to work correc
 The DNS name, IP address or SSH config ``Host`` of the test server. You need this to connect to the laboratory.
 
 
-.. _test_domain_config_option:
+.. _configuration:test_domain:
 
 ``test_domain``
 ---------------
@@ -74,12 +78,14 @@ The DNS name, IP address or SSH config ``Host`` of the test server. You need thi
     * - Acceptable values:
       - String
 
-The DNS subdomain in which the test server lives. This is the wildcard DNS name without the ``*.``\ , like ``test.example.com``\ . This is used with :ref:`host_name_pattern_config_option` to create the virtual host name.
+The DNS subdomain in which the test server lives. This is the wildcard DNS name without the ``*.``\ , like ``test.example.com``\ . This is used with :ref:`configuration:host_name_pattern` to create the virtual host name.
+
+.. _configuration_optional_options:
 
 Optional configuration options
 ==============================
 
-.. _app_name_config_option:
+.. _configuration:app_name:
 
 ``app_name``
 ------------
@@ -99,7 +105,7 @@ Optional configuration options
 The name of the application. Ideally this should be a URL-friendly value. In order to get the default value, the labtest command must be made from within a Git repository.
 
 
-.. _host_name_pattern_config_option:
+.. _configuration:host_name_pattern:
 
 ``host_name_pattern``
 ---------------------
@@ -116,7 +122,7 @@ The name of the application. Ideally this should be a URL-friendly value. In ord
     * - Acceptable values:
       - String with placeholders suitable for a URL
 
-The pattern to use to generate the host part of the DNS address. This is used with :ref:`test_domain_config_option` to generate the virtual host name.
+The pattern to use to generate the host part of the DNS address. This is used with :ref:`configuration:test_domain` to generate the virtual host name.
 
 This pattern may contain `Python string interpolation formatting`_. The context passed to this includes:
 
@@ -127,7 +133,7 @@ This pattern may contain `Python string interpolation formatting`_. The context 
 .. _python string interpolation formatting: https://docs.python.org/3/library/stdtypes.html#old-string-formatting
 
 
-.. _environment_config_option:
+.. _configuration:environment:
 
 ``environment``
 ---------------
@@ -175,7 +181,7 @@ A list of environment variable strings to include in the Docker container.
    environment = FOO=bar,TEST=true,DEBUG=true
 
 
-.. _use_ssh_config_config_option:
+.. _configuration:use_ssh_config:
 
 ``use_ssh_config``
 ------------------
@@ -209,10 +215,10 @@ Use your local SSH config when connecting. For example, if you set this option t
    ProxyCommand ssh -A -T bastion nc %h %p
    IdentityFile ~/.ssh/id_rsa
 
-You can now set the :ref:`host_config_option` configuration to ``test`` and it will route everything through the SSH bastion in the test environment. You can even ``ssh test`` from the command line.
+You can now set the :ref:`configuration:host` configuration to ``test`` and it will route everything through the SSH bastion in the test environment. You can even ``ssh test`` from the command line.
 
 
-.. _docker_image_pattern_config_option:
+.. _configuration:docker_image_pattern:
 
 ``docker_image_pattern``
 ------------------------
@@ -229,14 +235,14 @@ You can now set the :ref:`host_config_option` configuration to ``test`` and it w
     * - Acceptable values:
       - String with placeholders
 
-The image to use to build the container. Allows `Python string interpolation formatting`_\ , with ``APP_NAME`` and ``INSTANCE_NAME`` in the context
+The string pattern to use when dynamically determining which image to use to build the container. Allows `Python string interpolation formatting`_\ , with ``APP_NAME`` and ``INSTANCE_NAME`` in the context.
 
-The value of this option depends on how your Docker images are built. (See `docker pull documentation`_ for more information about specifying images) If they are built using the default Lab Test method (the default), then the images will be local to the test server and can use a simple name. If the Docker images are built using an external process and in a private repo, the name will look like a URL, without the ``https://``\ .
+The value of this option depends on how your Docker images are built. (See `docker pull documentation`_ for more information about specifying images) If they are built using the :ref:`built-in <builtin_build_process:Built-in build process>` Lab Test method (the default), then the images will be local to the test server and can use a simple name. If the Docker images are built using an external process and in a private repo, the name will look like a URL, without the ``https://``\ .
 
 .. _docker pull documentation: https://docs.docker.com/engine/reference/commandline/pull/
 
 
-.. _build_provider_config_option:
+.. _configuration:build_provider:
 
 ``build_provider``
 ------------------
@@ -255,10 +261,10 @@ The value of this option depends on how your Docker images are built. (See `dock
 
 This is how your application and Docker image are built. Currently only ``local`` is supported.
 
-You must also set :ref:`code_repo_url_config_option`, :ref:`app_build_image_config_option`, :ref:`app_build_command_config_option`. If the default for :ref:`container_build_command_config_option` doesn't work for your project, set that too.
+You must also set :ref:`configuration:code_repo_url`, :ref:`configuration:app_build_image`, :ref:`configuration:app_build_command`. If the default for :ref:`configuration:container_build_command` doesn't work for your project, set that too.
 
 
-.. _code_repo_url_config_option:
+.. _configuration:code_repo_url:
 
 ``code_repo_url``
 -----------------
@@ -278,7 +284,7 @@ You must also set :ref:`code_repo_url_config_option`, :ref:`app_build_image_conf
 The URL of the code repository to check out.
 
 
-.. _app_build_image_config_option:
+.. _configuration:app_build_image:
 
 ``app_build_image``
 -------------------
@@ -295,14 +301,14 @@ The URL of the code repository to check out.
     * - Acceptable values:
       - String
 
-The Docker image to use to build the app. `Shippable`_ has some great `images publicly available`_\ . Here is their `docker page`_\ . This is required if you want to build the application on the test server. Also set the :ref:`app_build_command_config_option` option.
+The Docker image to use to build the app. `Shippable`_ has some great `images publicly available`_\ . Here is their `docker page`_\ . This is required if you want to build the application on the test server. Also set the :ref:`configuration:app_build_command` option.
 
 .. _shippable: https://www.shippable.com/
 .. _images publicly available: http://docs.shippable.com/platform/runtime/machine-image/ami-overview/
 .. _docker page: https://hub.docker.com/u/drydock/
 
 
-.. _app_build_command_config_option:
+.. _configuration:app_build_command:
 
 ``app_build_command``
 ---------------------
@@ -319,7 +325,7 @@ The Docker image to use to build the app. `Shippable`_ has some great `images pu
     * - Acceptable values:
       - Strings
 
-The script or command to run to build the app within the Docker image. This is required if you want to build the application on the test server. Also set the :ref:`app_build_image_config_option` option.
+The script or command to run to build the app within the Docker image. This is required if you want to build the application on the test server. Also set the :ref:`configuration:app_build_image` option.
 
 This command is executed from within the container and in the project's directory.
 
@@ -348,7 +354,7 @@ or:
     app_build_command: bash bin/build_my_app
 
 
-.. _container_build_command_config_option:
+.. _configuration:container_build_command:
 
 ``container_build_command``
 ---------------------------
@@ -387,7 +393,7 @@ If you override the docker build command, you *must* still tag it with ``$APP/$I
     If your ``Dockerfile`` doesn't use the default ``--build-arg``\ s passed, they are ignored.
 
 
-.. _container_provider_config_option:
+.. _configuration:container_provider:
 
 ``container_provider``
 ----------------------
