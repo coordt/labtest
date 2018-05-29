@@ -8,6 +8,7 @@ Subpackages
 
     labtest.provider.aws
     labtest.provider.docker
+    labtest.provider.local
 
 Submodules
 ----------

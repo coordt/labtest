@@ -12,7 +12,6 @@
    api/modules
    contributing
    authors
-   history
 
 Indices and tables
 ==================
