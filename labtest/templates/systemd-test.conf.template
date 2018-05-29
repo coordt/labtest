@@ -5,8 +5,8 @@ After=docker.service
 
 [Service]
 Restart=always
-ExecStart=/usr/bin/docker start -a %(APP_NAME)s-%(INSTANCE_NAME)s
-ExecStop=/usr/bin/docker stop -t 2 %(APP_NAME)s-%(INSTANCE_NAME)s
+ExecStart=/usr/bin/docker start -a %(APP_NAME)s-%(INSTANCE_NAME)s-code
+ExecStop=/usr/bin/docker stop -t 2 %(APP_NAME)s-%(INSTANCE_NAME)s-code
 
 [Install]
 WantedBy=default.target
