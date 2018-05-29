@@ -145,10 +145,10 @@ def _delete_backing_services():
     """
     Call the appropriate functions to delete any backing services
     """
-    from provider import providers
+    from provider import service_providers
 
     for service_name, config in iteritems(env.services):
-        service = providers[config['provider']][config['service']]
+        service = service_providers[config['provider']][config['service']]
         service.destroy(config, service_name)
 
 
