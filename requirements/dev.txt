@@ -1,7 +1,8 @@
 -r test.txt
-punch.py
-wheel
-watchdog
-flake8
-Sphinx
 cryptography
+flake8
+punch.py
+pystache
+Sphinx
+watchdog
+wheel
