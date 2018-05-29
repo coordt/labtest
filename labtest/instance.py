@@ -363,6 +363,8 @@ def delete_instance(name):
 
     _delete_backing_services()
     _delete_network()
+    click.echo('')
+    click.secho('Your experiment has been deleted.', fg='green')
 
 
 @task
@@ -380,14 +382,14 @@ def update_instance(name):
     _setup_templates()
     _update_container()
     services.start_service('{app_name}-{instance_name}'.format(**env), env.quiet)
+    click.echo('')
+    click.secho('Your experiment updated and available at: http://{}'.format(env.virtual_host), fg='green')
 
 
 @task
 def list_instances(app_name=''):
     """
-    @brief      return a list of test instances on the server
-
-    @return     outputs the list to the console
+    Return a list of test instances on the server
     """
     if app_name:
         find_cmd = 'find /testing/{}/ -mindepth 1 -maxdepth 1 -type d -print '.format(app_name)
