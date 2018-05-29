@@ -102,9 +102,9 @@ def _put_docker_build_cmd():
     contents = StringIO()
     contents.write(str(open(base_file, 'r').read()))
     contents.write(str(env.container_build_command))
-    with hide('running'):
+    with settings(hide('running'), warn_only=True):
         with cd(env.instance_path):
-            result = put(local_path=contents, remote_path='docker-build', mode=0o755)
+            result = put(local_path=contents, remote_path='docker-build', mode=0o775)
     if result.failed:
         click.ClickException('Failed to put the docker-build command on remote host.')
 
