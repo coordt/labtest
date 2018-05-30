@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.6 (2018-05-30)
+
+### Fix
+
+* Updated that test again. [Corey Oordt]
+
+
 ## 0.4.5 (2018-05-30)
 
 ### Fix
