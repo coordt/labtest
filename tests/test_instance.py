@@ -7,12 +7,14 @@ test_labtest
 
 Tests for `labtest instance` module.
 """
-
+import os
 from click.testing import CliRunner
 from fabric.api import env
 from labtest import instance
 from labtest import cli
 from .fabric_runner import setup_config, run_fabric_command
+
+FIXTURE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), 'fixtures'))
 
 
 def run_fabric_command_line_interface():
@@ -219,9 +221,7 @@ def test_delete_network():
 
 
 def test_setup_templates():
-    responses = {
-        '/bin/bash -l -c "docker network ls --filter name=testapp-testinstance-net --format \\"{{.ID}}\\""': '',
-    }
+    responses = {}
     env = {}
     files = {
         '/testing/testapp/testinstance/test.env': '',
@@ -230,6 +230,22 @@ def test_setup_templates():
         'Writing the experiment\'s environment file.\n'
     )
     run_fabric_command(instance._setup_templates, responses, expected, files, env)
+
+
+def test_get_environment():
+    setup_config(filepath=os.path.join(FIXTURE_DIR, 'config.yml'), branch_name='testbranch')
+    expected = (
+        'VIRTUAL_HOST=testapp-testinstance.test.example.com\n'
+        'INSTANCE_NAME=testinstance\n'
+        'BRANCH_NAME=testbranch\n'
+        'APP_NAME=testapp\n'
+        'FOO=bar\n'
+        'TEST=true\n'
+        'DEBUG=true\n'
+        'MY_HOST=testapp-testinstance.test.example.com\n'
+    )
+    response = instance._get_environment()
+    assert response.getvalue() == expected
 
 
 def test_update_container():

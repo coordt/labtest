@@ -8,3 +8,4 @@ labtest:
     - FOO=bar
     - TEST=true
     - DEBUG=true
+    - MY_HOST=$VIRTUAL_HOST

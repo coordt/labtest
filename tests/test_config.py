@@ -34,7 +34,7 @@ def check_config_result(config):
     assert config.app_name == 'testing'
     assert config.host == '10.2.3.4'
     assert config.use_ssh_config is True
-    assert len(config.environment) == 3
+    assert len(config.environment) == 4
 
 
 def test_single_environment_string():

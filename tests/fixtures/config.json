@@ -10,7 +10,8 @@
         "environment": [
             "FOO=bar",
             "TEST=true",
-            "DEBUG=true"
+            "DEBUG=true",
+            "MY_HOST=$VIRTUAL_HOST"
         ]
     }
 }

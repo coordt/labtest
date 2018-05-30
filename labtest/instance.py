@@ -174,23 +174,34 @@ def _delete_network():
         run('docker network rm {network_name}'.format(**env), quiet=env.quiet)
 
 
-def _setup_templates():
+def _get_environment():
     """
-    Write the templates to the appropriate places
+    Return the environment as a file-like object
+
+    Returns:
+        A file-like object that contains the experiment's environment
     """
     import re
     from io import StringIO
     encrypt_pattern = re.compile(r'^(.*)ENC\[([A-Za-z0-9+=/]+)\](.*)$')
+    virtualhost_pattern = re.compile(r'\$VIRTUAL_HOST')
 
-    env_dest = u'{instance_path}/test.env'.format(**env)
-    click.echo('Writing the experiment\'s environment file.')
     contents = StringIO()
-    with cd(env.instance_path):
-        env.virtual_host = _virtual_host_name()
-        contents.write(u'VIRTUAL_HOST={}\n'.format(env.virtual_host))
-        for key, val in iteritems(env.context):
-            contents.write(u'{}={}\n'.format(key, val))
-        for item in env.environment:
+    env.virtual_host = _virtual_host_name()
+    contents.write(u'VIRTUAL_HOST={}\n'.format(env.virtual_host))
+    for key, val in iteritems(env.context):
+        contents.write(u'{}={}\n'.format(key, val))
+    for item in env.environment:
+        item = virtualhost_pattern.sub(env.virtual_host, item)
+        match = encrypt_pattern.match(item)
+        if match:
+            contents.write(unicode(match.group(1)))
+            contents.write(unicode(env.config.secrets.decrypt(match.group(2))))
+            contents.write(unicode(match.group(3)))
+        else:
+            contents.write(u'{}\n'.format(item))
+    if 'backing_service_configs' in env:
+        for item in env.backing_service_configs.get('environment', []):
             match = encrypt_pattern.match(item)
             if match:
                 contents.write(unicode(match.group(1)))
@@ -198,15 +209,18 @@ def _setup_templates():
                 contents.write(unicode(match.group(3)))
             else:
                 contents.write(u'{}\n'.format(item))
-        if 'backing_service_configs' in env:
-            for item in env.backing_service_configs.get('environment', []):
-                match = encrypt_pattern.match(item)
-                if match:
-                    contents.write(unicode(match.group(1)))
-                    contents.write(unicode(env.config.secrets.decrypt(match.group(2))))
-                    contents.write(unicode(match.group(3)))
-                else:
-                    contents.write(u'{}\n'.format(item))
+    return contents
+
+
+def _setup_templates():
+    """
+    Write the templates to the appropriate places
+    """
+    env_dest = u'{instance_path}/test.env'.format(**env)
+    click.echo('Writing the experiment\'s environment file.')
+    contents = _get_environment()
+
+    with cd(env.instance_path):
         with hide('running'):
             put(local_path=contents, remote_path=env_dest)
 
