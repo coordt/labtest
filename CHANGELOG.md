@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.5 (2018-05-30)
+
+### Fix
+
+* Tixed a test that was non-determinative. [Corey Oordt]
+
+
 ## 0.4.4 (2018-05-30)
 
 ### New
