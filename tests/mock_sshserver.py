@@ -14,7 +14,7 @@ except ImportError:  # Python 2.7
 
 import paramiko
 
-logging.basicConfig(filename='testserver.log', level=logging.INFO)
+logging.basicConfig(filename='testserver.log', level=logging.ERROR)
 logger = logging.getLogger('server.py')
 
 

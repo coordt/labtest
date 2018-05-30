@@ -239,3 +239,8 @@ def test_get_state_none():
     c = config.get_config(os.path.join(FIXTURE_DIR, 'config.yml'), host='username@127.0.0.1:{}'.format(port))
     response = run_fabric_command(c.get_state, responses, expected, files, env, port=port)
     assert response is None
+
+
+def test_backing_services():
+    c = config.get_config(os.path.join(FIXTURE_DIR, 'mysql-config.yml'))
+    assert len(c.services) == 1

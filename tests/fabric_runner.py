@@ -11,7 +11,9 @@ class FabricException(Exception):
 
 def setup_config(port=PORT, **kwargs):
     from labtest.config import get_config
+    filepath = kwargs.pop('filepath', '')
     cfg = get_config(
+        filepath,
         host='127.0.0.1',
         app_name='testapp',
         code_repo_url='git@github.com:example/example.git',

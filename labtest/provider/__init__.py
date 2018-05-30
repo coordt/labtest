@@ -37,4 +37,5 @@ def check_services_config(services):
         if config['service'] not in service_providers[config['provider']]:
             raise click.ClickException('The {provider} provider doesn\'t have a registered service of "{service}".'.format(**config))
 
+
 __all__ = ['secret_providers', 'service_providers', 'state_providers', 'check_services_config']

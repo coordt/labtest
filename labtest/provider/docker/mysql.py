@@ -14,13 +14,24 @@ def _get_initial_data_source(path):
     """
     If the path is a directory, get the latest file in it. If the path is a file
     return the path
+
+    Args:
+        path: The full directory or file path for backups
+
+    Returns:
+        File path to the backup file. If a directory is passed, it returns the latest file.
+
+    Raises:
+        click.ClickException
     """
-    out = run('stat -L --format=%F {}'.format(path), quiet=env.quiet)
+    with settings(warn_only=True):
+        out = run('stat -L --format=%F {}'.format(path), quiet=env.quiet)
     if out.succeeded:
         if out == 'regular file':
             return path
         elif out == 'directory':
-            latest = run('ls -1td {}/* | head -1'.format(path.rstrip('/')), quiet=env.quiet)
+            with settings(warn_only=True):
+                latest = run('ls -1td {}/* | head -1'.format(path.rstrip('/')), quiet=env.quiet)
             if latest.succeeded:
                 return latest
             else:
@@ -35,6 +46,15 @@ def _setup_initial_data_source(path):
     """
     Check for the real initial data source and symlink it to an ``initialdata``
     directory in the experiment's namespace
+
+    Args:
+        path: The full directory or file path for backups
+
+    Returns:
+        File path to the symlink to the backup file.
+
+    Raises:
+        click.ClickException
     """
     real_path = _get_initial_data_source(path)
     init_data_path = '{instance_path}/initialdata'.format(**env)
@@ -47,20 +67,22 @@ def _setup_initial_data_source(path):
             return link_path
         else:
             # the initial data source must have changed, so clear it out
-            run('rm -Rf {}'.format(init_data_path), quiet=env.quiet)
+            run('rm -Rf {}/*'.format(init_data_path), quiet=env.quiet)
     else:
         run('mkdir -p {}'.format(init_data_path), quiet=env.quiet)
         run('chgrp docker {}'.format(init_data_path), quiet=env.quiet)
-        run('ln -s {} {}'.format(real_path, link_path), quiet=env.quiet)
+    run('ln -s {} {}'.format(real_path, link_path), quiet=env.quiet)
     click.echo('  Created a symlink from {} -> {}'.format(real_path, link_path))
     return link_path
 
 
 def _setup_env_file(filepath, environment):
     """
-    Write the templates to the appropriate places
+    Write the an environment file for the service container
 
-    @param environment  A list of strings
+    Args:
+        filepath: The full path to store the environment
+        environment  A list of strings
     """
     contents = BytesIO()
     for item in environment:
@@ -294,4 +316,4 @@ def check_config(config):
     Returns:
        ``True`` if the configuration is correct, otherwise ``False``.
     """
-    pass
+    return True
