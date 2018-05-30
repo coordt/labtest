@@ -234,7 +234,7 @@ def test_setup_templates():
 
 def test_get_environment():
     setup_config(filepath=os.path.join(FIXTURE_DIR, 'config.yml'), branch_name='testbranch')
-    expected = (
+    expected = [
         'VIRTUAL_HOST=testapp-testinstance.test.example.com\n'
         'INSTANCE_NAME=testinstance\n'
         'BRANCH_NAME=testbranch\n'
@@ -243,9 +243,10 @@ def test_get_environment():
         'TEST=true\n'
         'DEBUG=true\n'
         'MY_HOST=testapp-testinstance.test.example.com\n'
-    )
-    response = instance._get_environment()
-    assert response.getvalue() == expected
+    ]
+    response = instance._get_environment().getvalue()
+    for item in expected:
+        assert item in response
 
 
 def test_update_container():
