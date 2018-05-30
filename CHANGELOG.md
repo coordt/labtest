@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.4 (2018-05-30)
+
+### New
+
+* Changes the string $VIRTUAL_HOST in environment variables to the actual virtual host name when writing the environment. [Corey Oordt]
+
+* Added docker mysql tests. [Corey Oordt]
+
+
 ## 0.4.3 (2018-05-29)
 
 ### Fix
