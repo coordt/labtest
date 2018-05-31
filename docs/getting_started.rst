@@ -89,7 +89,7 @@ Containerize it
 
 Each experiment runs in a Docker container and is configured via environment variables. If your app doesn't already have a ``Dockerfile`` and a way to build everything as a container, you need to adapt it.
 
-This topic is too broad to go into here, but the :ref:`Tutorial <tutorial:containerizing>` demonstrates a very simple conversion. You'll know you are ready when you can run something like:
+This topic is too broad to go into here, but the :ref:`Tutorial <tutorials/containerizing:containerizing>` demonstrates a very simple conversion. You'll know you are ready when you can run something like:
 
 .. code-block:: console
 

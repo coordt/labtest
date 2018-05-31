@@ -59,7 +59,7 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'contents'
 
 # General information about the project.
 project = u'Lab Test'
@@ -130,7 +130,7 @@ html_theme_options = {
     'description': 'LabTest deploys branch "foo" onto a server that others can reach at "foo.test.example.com".',
 }
 html_experimental_html5_writer = True
-
+html_scaled_image_link = False
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = ['theme']
 
@@ -175,7 +175,9 @@ html_sidebars = {
 
 # Additional templates that should be rendered to pages, maps page names
 # to template names.
-#html_additional_pages = {}
+html_additional_pages = {
+    'index': 'homepage.html_t',
+}
 
 # If false, no module index is generated.
 #html_domain_indices = True
