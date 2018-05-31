@@ -536,6 +536,7 @@ def test_has_config_changed_missing():
 def test_create():
     from .fabric_runner import setup_config
     cfg = setup_config(filepath=os.path.join(FIXTURE_DIR, 'mysql-config.yml'))
+    cfg.services['db']['options']['wait_for_service'] = False
 
     responses = {
         '/bin/bash -l -c "stat -L --format=%F /backups/testapp/"': 'directory',
@@ -596,3 +597,108 @@ def test_create():
         '[{host}] sudo: systemctl start testapp-testinstance-db.service\n'
     )
     run_fabric_command(mysql.create, responses, expected, files, environ, None, cfg.services['db'], 'db')
+
+
+def test_wait_for_service():
+    from .fabric_runner import setup_config
+    cfg = setup_config(filepath=os.path.join(FIXTURE_DIR, 'mysql-config.yml'))
+    svc_config = mysql._get_service_config(cfg.services['db'], 'db')
+
+    assert svc_config['wait_attempts'] == 2
+    assert svc_config['wait_timeout'] == 3
+
+    responses = {
+        '/bin/bash -l -c "docker run -it --name testapp-testinstance-db-client --network testapp-testinstance-net --env-file /testing/testapp/testinstance/testapp-testinstance-db.env --rm mysql:5.6 sh -c \'exec mysql -h\\"db\\" -uroot -D\\"\\$MYSQL_DATABASE\\" --execute \\"SELECT VERSION();\\"\'"': 'Success',
+    }
+    environ = {
+        'filepath': os.path.join(FIXTURE_DIR, 'mysql-config.yml')
+    }
+    files = {}
+    expected = (
+        '  Waiting for the service...\n'
+        '  Attempt 1 of 2 (3 seconds to go)\n'
+        '[{host}] run: docker run -it --name testapp-testinstance-db-client --network testapp-testinstance-net --env-file /testing/testapp/testinstance/testapp-testinstance-db.env --rm mysql:5.6 sh -c \'exec mysql -h"db" -uroot -D"$MYSQL_DATABASE" --execute "SELECT VERSION();"\'\n'
+        '[{host}] out: Success\n'
+        '  Service is ready\n'
+    )
+    response = run_fabric_command(mysql._wait_for_service, responses, expected, files, environ, None, svc_config)
+    assert response is True
+
+
+def test_wait_for_service_no():
+    from .fabric_runner import setup_config
+    cfg = setup_config(filepath=os.path.join(FIXTURE_DIR, 'mysql-config.yml'))
+    svc_config = mysql._get_service_config(cfg.services['db'], 'db')
+    svc_config['wait_for_service'] = False
+    responses = {}
+    environ = {
+        'filepath': os.path.join(FIXTURE_DIR, 'mysql-config.yml')
+    }
+    files = {}
+    expected = ''
+    response = run_fabric_command(mysql._wait_for_service, responses, expected, files, environ, None, svc_config)
+    assert response is True
+
+
+def test_wait_for_service_max_attempts():
+    from .fabric_runner import setup_config
+    cfg = setup_config(filepath=os.path.join(FIXTURE_DIR, 'mysql-config.yml'))
+    svc_config = mysql._get_service_config(cfg.services['db'], 'db')
+    svc_config['wait_attempts'] = 2
+
+    responses = {
+        '/bin/bash -l -c "docker run -it --name testapp-testinstance-db-client --network testapp-testinstance-net --env-file /testing/testapp/testinstance/testapp-testinstance-db.env --rm mysql:5.6 sh -c \'exec mysql -h\\"db\\" -uroot -D\\"\\$MYSQL_DATABASE\\" --execute \\"SELECT VERSION();\\"\'"': ('', 'fail', 1),
+    }
+    environ = {
+        'filepath': os.path.join(FIXTURE_DIR, 'mysql-config.yml')
+    }
+    files = {}
+    expected = (
+        '  Waiting for the service...\n'
+        '  Attempt 1 of 2 (3 seconds to go)\n'
+        '[{host}] run: docker run -it --name testapp-testinstance-db-client --network testapp-testinstance-net --env-file /testing/testapp/testinstance/testapp-testinstance-db.env --rm mysql:5.6 sh -c \'exec mysql -h"db" -uroot -D"$MYSQL_DATABASE" --execute "SELECT VERSION();"\'\n'
+        '[{host}] out: fail\n'
+        '  - Waiting for 1 second...\n'
+        '  Attempt 2 of 2 (2 seconds to go)\n'
+        '[{host}] run: docker run -it --name testapp-testinstance-db-client --network testapp-testinstance-net --env-file /testing/testapp/testinstance/testapp-testinstance-db.env --rm mysql:5.6 sh -c \'exec mysql -h"db" -uroot -D"$MYSQL_DATABASE" --execute "SELECT VERSION();"\'\n'
+        '[{host}] out: fail\n'
+        '  - Waiting for 2 seconds...\n'
+        '  Trying one last time...\n'
+        '[{host}] run: docker run -it --name testapp-testinstance-db-client --network testapp-testinstance-net --env-file /testing/testapp/testinstance/testapp-testinstance-db.env --rm mysql:5.6 sh -c \'exec mysql -h"db" -uroot -D"$MYSQL_DATABASE" --execute "SELECT VERSION();"\'\n'
+        '[{host}] out: fail\n'
+    )
+
+    response = run_fabric_command(mysql._wait_for_service, responses, expected, files, environ, None, svc_config)
+    assert response is False
+
+
+def test_wait_for_service_max_timeout():
+    from .fabric_runner import setup_config
+    cfg = setup_config(filepath=os.path.join(FIXTURE_DIR, 'mysql-config.yml'))
+    svc_config = mysql._get_service_config(cfg.services['db'], 'db')
+    svc_config['wait_attempts'] = 6
+    svc_config['wait_timeout'] = 2
+    responses = {
+        '/bin/bash -l -c "docker run -it --name testapp-testinstance-db-client --network testapp-testinstance-net --env-file /testing/testapp/testinstance/testapp-testinstance-db.env --rm mysql:5.6 sh -c \'exec mysql -h\\"db\\" -uroot -D\\"\\$MYSQL_DATABASE\\" --execute \\"SELECT VERSION();\\"\'"': ('', 'fail', 1),
+    }
+    environ = {
+        'filepath': os.path.join(FIXTURE_DIR, 'mysql-config.yml')
+    }
+    files = {}
+    expected = (
+        '  Waiting for the service...\n'
+        '  Attempt 1 of 6 (2 seconds to go)\n'
+        '[{host}] run: docker run -it --name testapp-testinstance-db-client --network testapp-testinstance-net --env-file /testing/testapp/testinstance/testapp-testinstance-db.env --rm mysql:5.6 sh -c \'exec mysql -h"db" -uroot -D"$MYSQL_DATABASE" --execute "SELECT VERSION();"\'\n'
+        '[{host}] out: fail\n'
+        '  - Waiting for 1 second...\n'
+        '  Attempt 2 of 6 (1 seconds to go)\n'
+        '[{host}] run: docker run -it --name testapp-testinstance-db-client --network testapp-testinstance-net --env-file /testing/testapp/testinstance/testapp-testinstance-db.env --rm mysql:5.6 sh -c \'exec mysql -h"db" -uroot -D"$MYSQL_DATABASE" --execute "SELECT VERSION();"\'\n'
+        '[{host}] out: fail\n'
+        '  - Waiting for 1 second...\n'
+        '  Attempt 3 of 6 (0 seconds to go)\n'
+        '[{host}] run: docker run -it --name testapp-testinstance-db-client --network testapp-testinstance-net --env-file /testing/testapp/testinstance/testapp-testinstance-db.env --rm mysql:5.6 sh -c \'exec mysql -h"db" -uroot -D"$MYSQL_DATABASE" --execute "SELECT VERSION();"\'\n'
+        '[{host}] out: fail\n'
+    )
+
+    response = run_fabric_command(mysql._wait_for_service, responses, expected, files, environ, None, svc_config)
+    assert response is False

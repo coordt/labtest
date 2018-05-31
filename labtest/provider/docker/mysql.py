@@ -238,8 +238,79 @@ def _get_service_config(config, name):
     service_config['volume_name'] = '{service_name}-data'.format(**service_config)
     service_config['config_path'] = '{instance_path}/{service_name}.conf.json'.format(**service_config)
     service_config['network_name'] = '{app_name}-{instance_name}-net'.format(name=name, **env)
+    if 'wait_timeout' not in service_config:
+        service_config['wait_timeout'] = 60
+    else:
+        service_config['wait_timeout'] = int(service_config['wait_timeout'])
+    if 'wait_attempts' not in service_config:
+        service_config['wait_attempts'] = 6
+    else:
+        service_config['wait_attempts'] = int(service_config['wait_attempts'])
 
     return service_config
+
+
+def _is_service_ready(config):
+    """
+    Try to connect to see if the service is ready for connections
+
+    Args:
+        config: The service configuration
+
+    Returns:
+        True if service is accepting connections, False if not
+    """
+    cmd = [
+        'docker run -it',
+        '--name {service_name}-client',
+        '--network {network_name}',
+        '--env-file {environment_file_path}',
+        '--rm {image}',
+        'sh -c',
+        '\'exec mysql -h"{name}" -uroot -D"$MYSQL_DATABASE" --execute "SELECT VERSION();"\''
+    ]
+    with settings(warn_only=True):
+        response = run(' '.join(cmd).format(**config), quiet=env.quiet)
+        return response.succeeded
+
+
+def _wait_for_service(config):
+    """
+    Wait for the service, if configured to do so
+    """
+    import time
+
+    if not config.get('wait_for_service', False):
+        return True
+
+    click.echo('  Waiting for the service...')
+    wait_time = config['wait_timeout']
+    wait_attempts = config['wait_attempts']
+    attempts = 0
+    initial_time = time.time()
+    end_time = initial_time + wait_time
+
+    click.echo('  Attempt {} of {} ({} seconds to go)'.format(attempts + 1, wait_attempts, wait_time))
+    while not _is_service_ready(config):
+        current_time = time.time()
+        if end_time < current_time or attempts == wait_attempts:
+            return False
+        time_left = int(round(end_time - current_time, 0))
+        sleep_time = min([2 ** attempts, time_left])
+        if sleep_time == 1:
+            click.echo('  - Waiting for {} second...'.format(sleep_time))
+        else:
+            click.echo('  - Waiting for {} seconds...'.format(sleep_time))
+        time.sleep(sleep_time)
+        time_left = int(round(end_time - time.time(), 0))
+        attempts += 1
+        if attempts == wait_attempts:
+            click.echo('  Trying one last time...')
+        else:
+            click.echo('  Attempt {} of {} ({} seconds to go)'.format(attempts + 1, wait_attempts, time_left))
+
+    click.secho('  Service is ready', fg='green')
+    return True
 
 
 def create(config, name):
@@ -278,6 +349,9 @@ def create(config, name):
         services.setup_service(service_config['service_name'], systemd_template, {'SERVICE_NAME': service_config['service_name']}, env.quiet)
 
         _write_config(service_config, service_config['config_path'])
+
+    if not _wait_for_service(service_config):
+        raise click.ClickException('  The MySQL service was not ready in the time allotted ({wait_timeout} seconds or {wait_attempts} attempts)'.format(**service_config))
 
     return {}
 

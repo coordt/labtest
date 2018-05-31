@@ -37,6 +37,9 @@ MySQL
           options:
             initial_data_source: "/backups/bostongov/"
             image: "mysql:5.6"
+            wait_for_service: false
+            wait_attempts: 6
+            wait_timeout: 60
             commands:
               - "--character-set-server=utf8mb4"
               - "--collation-server=utf8mb4_unicode_ci"
@@ -90,6 +93,89 @@ This is the MySQL Docker image to use for the service.
     If you do not use an official MySQL image, some provisioning functions might not work, such as the ``initial_data_source``\ .
 
 .. _official MySQL Docker image: https://hub.docker.com/_/mysql/
+
+
+.. _docker:wait_for_service:
+
+``wait_for_service``
+~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``False``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - ``True`` or ``False``
+
+Should we wait to make sure this service is running and accepting connections before continuing? If ``True``, it will attempt to connect up to :ref:`docker:wait_attempts` times or :ref:`docker:wait_timeout` seconds before giving up. LabTest uses an exponential wait between each attempt: 1 second, then 2 seconds, 4 seconds, 8 seconds, etc.
+
+.. _docker:wait_attempts:
+
+``wait_attempts``
+~~~~~~~~~~~~~~~~~
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``6``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - Positive number
+
+This is how many attempts to make before giving up on the service. It is closely tied to :ref:`docker:wait_timeout` in that there is a longer wait time between each attempt, which brings it closer to the ``wait_timeout``.
+
+
+.. table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: auto
+
+    =======  ================  ================
+    Attempt  Min Elapsed Time  Pause after fail
+    =======  ================  ================
+    1        0 seconds         1 seconds
+    2        1 seconds         2 seconds
+    3        3 seconds         4 seconds
+    4        7 seconds         8 seconds
+    5        15 seconds        16 seconds
+    6        31 seconds        32 seconds
+    7        63 seconds        64 seconds
+    8        127 seconds       128 seconds
+    9        255 seconds       256 seconds
+    10       511 seconds       512 seconds
+    11       1023 seconds      1024 seconds
+    12       2047 seconds      2048 seconds
+    =======  ================  ================
+
+Looking at the above table, it will take a minimum of 2047 seconds to make 12 attempts. That assumes that the attempt fails immediately. So with a `wait_timeout` of 60 seconds, you'll only get 6 attempts before the time runs out.
+
+
+.. _docker:wait_timeout:
+
+``wait_timeout``
+~~~~~~~~~~~~~~~~
+
+.. list-table::
+    :class: uk-table uk-table-striped uk-table-small
+    :widths: 33 64
+    :stub-columns: 1
+
+    * - Default:
+      - ``60``
+    * - Required:
+      - ``False``
+    * - Acceptable values:
+      - Positive integer
+
+How long in seconds to wait before giving up.
 
 
 .. _docker:commands:

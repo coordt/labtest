@@ -41,6 +41,7 @@ def run_fabric_command(command, responses, expected, files=None, environ=None, p
     """
     Does the actual running of the command and testing the output
     """
+    import difflib
     import random
 
     if port is None:
@@ -66,16 +67,23 @@ def run_fabric_command(command, responses, expected, files=None, environ=None, p
                 response = command(*args, **kwargs)
             except FabricException as e:
                 exception = True
+            except KeyboardInterrupt:
+                exception = True
 
     output = out[0].getvalue()
     error = out[1].getvalue()
 
     if output != expected or exception:
         print ''
-        print "STDOUT:", output
+        print "STDOUT:"
+        print output
+        diff = difflib.ndiff(output.split('\n'), expected.split('\n'))
+        print 'DIFF:'
+        print '\n'.join(diff)
     if error or exception:
         print ''
-        print "STDERR:", error
+        print "STDERR:"
+        print error
     if exception:
         raise e
     else:
