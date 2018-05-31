@@ -300,12 +300,12 @@ Having an experiment out there is nice, but what if you make changes in the bran
 
 Let's do that. We made a simple but noticeable change to the base template:
 
-.. figure::  images/tutorial-before.png
+.. figure::  /images/tutorial-before.png
     :alt: The page before the change
 
     The page before the change
 
-.. figure::  images/tutorial-after.png
+.. figure::  /images/tutorial-after.png
     :alt: The page after the change
 
     The page after the change
