@@ -73,6 +73,12 @@ Architecture Principles
 **Accessible by developers via SSH.** The primary reason is that it is via SSH that the commands will communicate to set up each test instance. The other is that there are occasions when a developer having access to a production-like environment is advantageous. Being able to tweak things on the server is a quick and easy way to debug.
 
 
+Installation / Setup
+--------------------
+
+Check out the [LabTest documentation](https://labtest.readthedocs.io/en/latest/contents.html) for instructions on [Installation](https://labtest.readthedocs.io/en/latest/installation.html) and [Getting started](https://labtest.readthedocs.io/en/latest/getting_started.html).
+
+
 Colophon
 --------
 
