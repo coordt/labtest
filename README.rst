@@ -30,7 +30,20 @@ There are three parts to LabTest: the server architecture (or *laboratory),* the
 
 **The experiment configuration.** The experiment configuration instructs LabTest how to publish the code experiments. It sits in the code repository so any developer who works on the code can publish new experiments.
 
-**The client.** The client is a command line tool that uses SSH and the configuration to create, list, update, and delete experiments in the laboratory.
+**The client.** The client is a command line tool that uses SSH and the experiment configuration to create, list, update, and delete experiments in the laboratory.
+
+
+What can you do with it?
+------------------------
+
+**Parallel development.** One developer can complete three tickets, in three different branches, and publish the three experiments for review by three different people. As the tickets are completed, the branches can be merged and the experiments deleted in any order.
+
+**Quick evaluation of new ideas.** Sometimes you just want to try something. LabTest makes it easy to demonstrate the idea.
+
+**Open evaluation to a greater audience.** When the experiments are accessible from the internet, people don't have to look over the developer's shoulder to see the progress.
+
+**Provision one-time use apps.** At its core, LabTest provisions isolated temporary infrastructure. You could use this to make it easy to set up and tear down an app for a one-time use.
+
 
 Functional Principles
 ---------------------
@@ -59,17 +72,6 @@ Architecture Principles
 
 **Accessible by developers via SSH.** The primary reason is that it is via SSH that the commands will communicate to set up each test instance. The other is that there are occasions when a developer having access to a production-like environment is advantageous. Being able to tweak things on the server is a quick and easy way to debug.
 
-
-What can you do with it?
-------------------------
-
-**Asynchronous evaluation of tickets.** A developer can complete three tickets, in three different branches, and publish the three experiments for review by different people. As the tickets are completed, the branches can be merged and the experiments deleted in any order.
-
-**Quick evaluation of new ideas.** Sometimes you just want to try something. LabTest makes it easy to demonstrate the idea.
-
-**Open evaluation to a greater audience.** When the experiments are accessible from the internet, people don't have to look over the developer's shoulder to see the progress.
-
-**Provision one-time use apps.** At its core, LabTest provisions isolated temporary infrastructure. You could use this to make it easy to set up and tear down an app for a one-time use.
 
 Colophon
 --------
