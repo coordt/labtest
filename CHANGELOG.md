@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.7 (2018-05-31)
+
+### New
+
+* Added ability to wait for the Docker MySQL service to start before continuing. [Corey Oordt]
+
+### Updates
+
+* More documentation editing. [Corey Oordt]
+
+* Added a homepage to the docs. [Corey Oordt]
+
+* Rearranging documentation for better accessibility. [Corey Oordt]
+
+
 ## 0.4.6 (2018-05-30)
 
 ### Fix
