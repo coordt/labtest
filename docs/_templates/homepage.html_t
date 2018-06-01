@@ -24,7 +24,7 @@
                         <img src="{{ pathto('_static/images/generic-fpo.svg', 1) }}" width="64" height="64" alt="Introduction">
                     </a>
                 </p>
-                <h3 class="uk-card-title"><a href="{{ pathto('about') }}">Intro for developers</a></h3>
+                <h3 class="uk-card-title"><a href="{{ pathto('getting_started') }}">Intro for developers</a></h3>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             </div>
         </div>
@@ -32,7 +32,7 @@
             <div class="uk-card uk-card-default uk-card-small uk-card-body">
                 <p class="uk-text-center">
                     <a href="{{ pathto('tutorials/index') }}">
-                        <img src="{{ pathto('_static/images/generic-fpo.svg', 1) }}" width="64" height="64" alt="About">
+                        <img src="{{ pathto('_static/images/generic-fpo.svg', 1) }}" width="64" height="64" alt="Tutorials">
                     </a>
                 </p>
                 <h3 class="uk-card-title"><a href="{{ pathto('tutorials/index') }}">Tutorials</a></h3>
@@ -42,33 +42,33 @@
         <div>
             <div class="uk-card uk-card-default uk-card-small uk-card-body">
                 <p class="uk-text-center">
-                    <a href="about.html">
-                        <img src="{{ pathto('_static/images/generic-fpo.svg', 1) }}" width="64" height="64" alt="About">
+                    <a href="{{ pathto('admin/setting_up_the_lab') }}">
+                        <img src="{{ pathto('_static/images/generic-fpo.svg', 1) }}" width="64" height="64" alt="Setting up the lab">
                     </a>
                 </p>
-                <h3 class="uk-card-title">Set up your laboratory</h3>
+                <h3 class="uk-card-title"><a href="{{ pathto('admin/setting_up_the_lab') }}">Set up your laboratory</a></h3>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             </div>
         </div>
         <div>
             <div class="uk-card uk-card-default uk-card-small uk-card-body">
                 <p class="uk-text-center">
-                    <a href="about.html">
-                        <img src="{{ pathto('_static/images/generic-fpo.svg', 1) }}" width="64" height="64" alt="About">
+                    <a href="{{ pathto('reference/setting_up_your_project') }}">
+                        <img src="{{ pathto('_static/images/generic-fpo.svg', 1) }}" width="64" height="64" alt="Set up your project">
                     </a>
                 </p>
-                <h3 class="uk-card-title">Set up your project</h3>
+                <h3 class="uk-card-title"><a href="{{ pathto('reference/setting_up_your_project') }}">Set up your project</a></h3>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             </div>
         </div>
         <div>
             <div class="uk-card uk-card-default uk-card-small uk-card-body">
                 <p class="uk-text-center">
-                    <a href="about.html">
-                        <img src="{{ pathto('_static/images/generic-fpo.svg', 1) }}" width="64" height="64" alt="About">
+                    <a href="{{ pathto('reference/index') }}">
+                        <img src="{{ pathto('_static/images/generic-fpo.svg', 1) }}" width="64" height="64" alt="Reference">
                     </a>
                 </p>
-                <h3 class="uk-card-title">Reference</h3>
+                <h3 class="uk-card-title"><a href="{{ pathto('reference/index') }}">Reference</a></h3>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             </div>
         </div>

@@ -2,7 +2,7 @@
 Experiment Configuration
 ========================
 
-In order for LabTest to create an experiment, it needs a little bit of information about your project. LabTest :ref:`requires <configuration:required configuration options>` very little configuration, but allows for lots of :ref:`customization <configuration:optional configuration options>`\ .
+In order for LabTest to create an experiment, it needs a little bit of information about your project. LabTest :ref:`requires <reference/configuration:required configuration options>` very little configuration, but allows for lots of :ref:`customization <reference/configuration:optional configuration options>`\ .
 
 
 Automatic configuration files
@@ -20,17 +20,17 @@ Alternate configuration files
 You can alternatively pass the configuration file to Lab Test at the command line with the ``--config`` option. Lab Test supports ``.ini``, ``.yml/.yaml``, and ``.json`` formats.
 
 
-.. literalinclude:: ../tests/fixtures/config.ini
+.. literalinclude:: /../tests/fixtures/config.ini
    :language: ini
    :caption: Example ``.ini`` configuration
 
 
-.. literalinclude:: ../tests/fixtures/config.yml
+.. literalinclude:: /../tests/fixtures/config.yml
    :language: yaml
    :caption: Example ``.yaml`` configuration
 
 
-.. literalinclude:: ../tests/fixtures/config.json
+.. literalinclude:: /../tests/fixtures/config.json
    :language: json
    :caption: Example ``.json`` configuration
 
@@ -237,7 +237,7 @@ You can now set the :ref:`configuration:host` configuration to ``test`` and it w
 
 The string pattern to use when dynamically determining which image to use to build the container. Allows `Python string interpolation formatting`_\ , with ``APP_NAME`` and ``INSTANCE_NAME`` in the context.
 
-The value of this option depends on how your Docker images are built. (See `docker pull documentation`_ for more information about specifying images) If they are built using the :ref:`built-in <builtin_build_process:Built-in build process>` Lab Test method (the default), then the images will be local to the test server and can use a simple name. If the Docker images are built using an external process and in a private repo, the name will look like a URL, without the ``https://``\ .
+The value of this option depends on how your Docker images are built. (See `docker pull documentation`_ for more information about specifying images) If they are built using the :ref:`built-in <reference/builtin_build_process:Built-in build process>` Lab Test method (the default), then the images will be local to the test server and can use a simple name. If the Docker images are built using an external process and in a private repo, the name will look like a URL, without the ``https://``\ .
 
 .. _docker pull documentation: https://docs.docker.com/engine/reference/commandline/pull/
 

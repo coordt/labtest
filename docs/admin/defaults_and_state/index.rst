@@ -37,7 +37,7 @@ Take this example:
           shared
           app-name2
 
-.. figure:: /images/state-search-postgresql.svg
+.. figure:: /_images/state-search-postgresql.svg
     :alt: Searching the state for /services/docker/postgresql/app-name1
     :width: 400
 
@@ -45,7 +45,7 @@ Take this example:
 
 If you wanted to get the value for ``/services/docker/postgresql/app-name1``\ , the state looks and sees there is a value for that.
 
-.. figure:: /images/state-search-mysql.svg
+.. figure:: /_images/state-search-mysql.svg
     :alt: Searching the state for /services/docker/mysql/app-name1
     :width: 400
 

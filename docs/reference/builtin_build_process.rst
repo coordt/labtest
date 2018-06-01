@@ -22,15 +22,15 @@ Build steps
 
 There are only three basic steps:
 
-.. figure:: /images/builtin-build-system.svg
+.. figure:: /_images/builtin-build-system.svg
     :alt: Built-in build system
     :width: 500
 
     The steps LabTest's built-in build system goes through to generate a Docker image.
 
-1. :ref:`builtin_build_process:check out code`.
-2. :ref:`builtin_build_process:build the application`.
-3. :ref:`builtin_build_process:build the docker image`.
+1. :ref:`reference/builtin_build_process:check out code`.
+2. :ref:`reference/builtin_build_process:build the application`.
+3. :ref:`reference/builtin_build_process:build the docker image`.
 
 
 Check out code
@@ -48,7 +48,7 @@ Most web apps today require some compilation and building in order to be ready t
 
 Docker containers are immutable; any changes made in the container are gone the next time you run the container. The app building process *needs* to make lasting changes, however. In order to do this, we need to mount the checked out code into the container.
 
-.. figure::  /images/build-environment.svg
+.. figure::  /_images/build-environment.svg
     :alt: Build environment with mounted volume
     :width: 400
 

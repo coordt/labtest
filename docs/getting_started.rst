@@ -2,6 +2,15 @@
 Getting Started
 ===============
 
+LabTest has three different parts: the laboratory, the project configuration and the client that runs on your machine.
+
+What do you need to do?
+
+- :ref:`I just need to get it working on my machine<getting_started:setting up your local machine>`
+- :ref:`I need to get my project ready<getting_started:Getting your code ready>`
+- :ref:`I need a laboratory<admin/setting_up_the_lab:Setting up the laboratory>`
+
+
 Setting up your local machine
 =============================
 

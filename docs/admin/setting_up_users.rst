@@ -15,24 +15,24 @@ Lab Test's SSH setup is based on a great article about `managing SSH access thro
 2. Sign into the `IAM console`_.
 3. In the IAM console, in the navigation pane, choose **Users**.
 
-   .. image::  /images/ssh-users/select-user.png
+   .. image::  /_images/ssh-users/select-user.png
        :alt: The IAM console
 
 4. Click on the appropriate user. (If you need to create the user, `refer to the IAM documentation`_).
 5. On the user details page, choose the **Security Credentials** tab.
 
-   .. image::  /images/ssh-users/user-security-cred-tab.png
+   .. image::  /_images/ssh-users/user-security-cred-tab.png
        :alt: The IAM User's security credentials tab
 
 6. Scroll down to the **SSH keys for AWS CodeCommit** section.
 
-   .. image:: /images/ssh-users/ssh-keys-for-code-commit-section.png
+   .. image:: /_images/ssh-users/ssh-keys-for-code-commit-section.png
        :alt: The SSH keys for code commit section of the user page
 
 7. Choose **Upload SSH public key**.
 8. Paste the contents of the SSH public key into the field, and then choose **Upload SSH public key**.
 
-   .. image::  /images/ssh-users/paste-public-key.png
+   .. image::  /_images/ssh-users/paste-public-key.png
        :alt: The upload SSH public key dialog
 
 9. Done!
