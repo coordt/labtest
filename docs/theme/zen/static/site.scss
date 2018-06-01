@@ -52,7 +52,10 @@ $chevron-left: "data:image/svg+xml;charset=UTF-8,%3Csvg width='34' height='59' x
 $chevron-right: "data:image/svg+xml;charset=UTF-8,%3Csvg width='34' height='59' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2.889 58.438L.111 55.561l27.482-26.535L.137 3.464 2.863.536l30.544 28.438L2.889 58.438' fill='#000'/%3E%3C/svg%3E";
 
 $base-code-font-family: 'Fira Mono', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
-
+$base-heading-font-family: Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$base-heading-font-weight: 700;
+$base-heading-text-transform: uppercase;
+$base-body-font-family: Lora, Georgia, serif;
 
 @import "uikit/src/scss/variables.scss";
 @import "uikit/src/scss/mixins.scss";
