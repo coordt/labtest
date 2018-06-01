@@ -20,22 +20,22 @@
         <div>
             <div class="uk-card uk-card-default uk-card-small uk-card-body">
                 <p class="uk-text-center">
-                    <a href="about.html">
-                        <img src="{{ pathto('_static/images/generic-fpo.svg', 1) }}" width="64" height="64" alt="About">
+                    <a href="{{ pathto('getting_started') }}">
+                        <img src="{{ pathto('_static/images/generic-fpo.svg', 1) }}" width="64" height="64" alt="Introduction">
                     </a>
                 </p>
-                <h3 class="uk-card-title">Intro for developers</h3>
+                <h3 class="uk-card-title"><a href="{{ pathto('about') }}">Intro for developers</a></h3>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             </div>
         </div>
         <div>
             <div class="uk-card uk-card-default uk-card-small uk-card-body">
                 <p class="uk-text-center">
-                    <a href="about.html">
+                    <a href="{{ pathto('tutorials/index') }}">
                         <img src="{{ pathto('_static/images/generic-fpo.svg', 1) }}" width="64" height="64" alt="About">
                     </a>
                 </p>
-                <h3 class="uk-card-title">Tutorials</h3>
+                <h3 class="uk-card-title"><a href="{{ pathto('tutorials/index') }}">Tutorials</a></h3>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             </div>
         </div>
