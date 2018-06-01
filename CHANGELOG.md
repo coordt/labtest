@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.4.8 (2018-06-01)
+
+### New
+
+* Adds the `before_start_command` configuration option. [Corey Oordt]
+
+* Added pytest-html for html reports. [Corey Oordt]
+
+### Updates
+
+* Reorganized documentation around new homepage. [Corey Oordt]
+
+* Adding links to home page and fixed latex and other rendering. [Corey Oordt]
+
+* Added new Boston.gov branding fonts to the theme. [Corey Oordt]
+
+
 ## 0.4.7 (2018-05-31)
 
 ### New
