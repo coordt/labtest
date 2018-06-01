@@ -220,6 +220,21 @@ def test_delete_network():
     run_fabric_command(instance._delete_network, responses, expected, files, env)
 
 
+def test_before_start_command():
+    responses = {
+        '/bin/bash -l -c "docker run --rm -ti --env-file /testing/testapp/testinstance/test.env --name testapp-testinstance-code-before-start --network testapp-testinstance-net testapp/testinstance:latest ./updateme"': '',
+    }
+    env = {
+        'before_start_command': './updateme'
+    }
+    files = {}
+    expected = (
+        'Running the "before start" command: ./updateme\n'
+        '[{host}] run: docker run --rm -ti --env-file /testing/testapp/testinstance/test.env --name testapp-testinstance-code-before-start --network testapp-testinstance-net testapp/testinstance:latest ./updateme\n'
+    )
+    run_fabric_command(instance._before_start_command, responses, expected, files, env)
+
+
 def test_setup_templates():
     responses = {}
     env = {}

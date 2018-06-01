@@ -10009,6 +10009,9 @@ ul.current > li.uk-transition-active.current [class*='uk-transition-slide'],
 h1 + p, h2 + p, h3 + p, h4 + p, h5 + p {
   margin-top: 12.99999996px; }
 
+h1 code, h2 code, h3 code, h4 code, h5 code {
+  text-transform: none; }
+
 .admonition {
   color: #222; }
   .admonition .admonition-title {

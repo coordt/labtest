@@ -266,6 +266,27 @@ def _update_container():
             sudo('systemctl start {app_name}-{instance_name}'.format(**env), quiet=env.quiet)
 
 
+def _before_start_command():
+    """
+    Run the ``before_start_command``, if configured
+    """
+    if not env.before_start_command:
+        return
+
+    click.echo('Running the "before start" command: {}'.format(env.before_start_command))
+
+    cmd = [
+        'docker run --rm -ti',
+        '--env-file {instance_path}/test.env',
+        '--name {container_name}-before-start',
+        '--network {network_name}',
+        '{docker_image}',
+        '{before_start_command}',
+    ]
+
+    run(' '.join(cmd).format(**env), quiet=env.quiet)
+
+
 def _setup_env_with_config(config):
     """
     Add config keys to the env
@@ -341,7 +362,7 @@ def create_instance(branch, name=''):
 
     _setup_templates()
     _update_container()
-
+    _before_start_command()
     systemd_template = os.path.join(os.path.dirname(__file__), 'templates', 'systemd-test.conf.template')
     services.setup_service(env.service_name, systemd_template, env.context, env.quiet)
     click.echo('')
@@ -394,6 +415,7 @@ def update_instance(name):
     _setup_backing_services()
     _setup_templates()
     _update_container()
+    _before_start_command()
     services.start_service('{service_name}'.format(**env), env.quiet)
     click.echo('')
     click.secho('Your experiment updated and available at: http://{}'.format(env.virtual_host), fg='green')

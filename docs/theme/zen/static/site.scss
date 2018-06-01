@@ -111,6 +111,9 @@ h1 + p, h2 + p, h3 + p, h4 + p, h5 + p {
     margin-top: $global-small-margin;
 }
 
+h1 code, h2 code, h3 code, h4 code, h5 code {
+    text-transform: none;
+}
 .admonition {
     @extend .uk-alert;
     color: $global-color;

@@ -51,6 +51,7 @@ class LabTestConfig(Config):
         'app_build_command',
         'app_build_image',
         'app_name',
+        'before_start_command',
         'build_provider',
         'container_provider',
         'docker_image_pattern',
@@ -91,6 +92,12 @@ class LabTestConfig(Config):
         out = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'])
         dirname, name = os.path.split(out.strip())
         return name
+
+    def get_default_before_start_command(self):
+        """
+        There is no default before_start_command
+        """
+        return None
 
     def get_default_build_provider(self):
         """
