@@ -209,25 +209,25 @@ For example:
 
 .. code-block:: yaml
 
-    app_build_command: ./manage.py migrate
+    before_start_command: ./manage.py migrate
 
 If you require several commands, you will need to create a script in your repository that we can run:
 
 .. code-block:: yaml
 
-    app_build_command: ./bin/update_database
+    before_start_command: ./bin/update_database
 
 If the execute bit is not set you must include the name of the program to execute the script, for example:
 
 .. code-block:: yaml
 
-    app_build_command: python ./config/migrate.py
+    before_start_command: python ./config/migrate.py
 
 or:
 
 .. code-block:: yaml
 
-    app_build_command: bash bin/update_my_app
+    before_start_command: bash bin/update_my_app
 
 
 
