@@ -7,7 +7,7 @@ LabTest has three different parts: the laboratory, the project configuration and
 What do you need to do?
 
 - :ref:`I just need to get it working on my machine<getting_started:setting up your local machine>`
-- :ref:`I need to get my project ready<getting_started:Getting your code ready>`
+- :ref:`I need to get my project ready<reference/setting_up_your_project:setting up your project>`
 - :ref:`I need a laboratory<admin/setting_up_the_lab:Setting up the laboratory>`
 
 
@@ -86,30 +86,3 @@ With that in place, you should be able to :command:`ssh` to the test server:
     [corey.oordt.at.boston.gov@ip-10-20-10-41 ~]$
 
 You can disconnect by typing :kbd:`control-d` or :kbd:`exit`.
-
-
-Getting your code ready
-=======================
-
-At this point, you may want to read the section on :ref:`how experiments work<admin/how_it_works:experiments>` to understand the process in more depth. Ultimately we will need a Docker image and a configuration when we are done.
-
-Containerize it
----------------
-
-Each experiment runs in a Docker container and is configured via environment variables. If your app doesn't already have a ``Dockerfile`` and a way to build everything as a container, you need to adapt it.
-
-This topic is too broad to go into here, but the :ref:`Tutorial <tutorials/containerizing:containerizing>` demonstrates a very simple conversion. You'll know you are ready when you can run something like:
-
-.. code-block:: console
-
-    $ docker build -t myapp .
-    $ docker run --rm -ti myapp
-
-That means your container builds and runs locally.
-
-.. _automating-the-app-build-process:
-
-Automating the app build process
---------------------------------
-
-LabTest doesn't really care how you generate a Docker image. That said, there is a built-in process that will build your app and Docker image on the laboratory server.
