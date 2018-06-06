@@ -119,7 +119,7 @@ To build the components, Lab Test checks out the code (using :ref:`configuration
 Build image
 -----------
 
-The *build image* is a general Docker image that has all the tools pre-installed to build our components. We need a node.js environment, so referring to :ref:`automating-the-app-build-process` we add ``"app_build_image": "drydock/u16nodall"`` to our configuration:
+The *build image* is a general Docker image that has all the tools pre-installed to build our components. We need a node.js environment, so referring to :ref:`configuration:app_build_image` we add ``"app_build_image": "drydock/u16nodall"`` to our configuration:
 
 .. code-block:: javascript
     :caption: Adding ``app_build_image`` to ``package.json``
