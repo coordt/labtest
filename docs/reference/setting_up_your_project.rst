@@ -2,7 +2,7 @@
 Setting up your project
 =======================
 
-At this point, you may want to read the section on :ref:`how experiments work<admin/how_it_works:experiments>` to understand the process in more depth. Ultimately LabTest needs a Docker image and a configuration to launch experiments.
+At this point, you may want to read the section on :ref:`how experiments work<reference/how_it_works:experiments>` to understand the process in more depth. Ultimately LabTest needs a Docker image and a configuration to launch experiments.
 
 Twelve factors
 ==============
@@ -37,7 +37,7 @@ Environment variables, passed into the Docker container, allow LabTest to dynami
 Backing services
 ----------------
 
-According to the `12-factor app definition`: A backing service is any service the app consumes over the network as part of its normal operation. LabTest allows you to specify what backing services you need in the experiment configuration. These backing services are provisioned and their configuration is passed via environment variables.
+According to the `12-factor app definition`_: A backing service is any service the app consumes over the network as part of its normal operation. LabTest allows you to specify what backing services you need in the experiment configuration. These backing services are provisioned and their configuration is passed via environment variables.
 
 .. _12-factor app definition: https://12factor.net/backing-services
 
@@ -68,7 +68,7 @@ Containerizing your project
 Your project might not run within a Docker container in production. However, a Docker container provides a nice, isolated environment with little overhead for creating these temporary experiments.
 
 
-This topic is too broad to go into here, but the :ref:`Tutorial<tutorials/containerizing:containerizing>` demonstrates a very simple conversion. You'll know you are ready when you can run something like:
+This topic is too broad to go into here because different technology stacks have different recommendations. We do have a page of :doc:`Docker container tips</reference/container_tips>` and the :ref:`Tutorial<tutorials/containerizing:containerizing>` demonstrates a very simple conversion. You'll know you are ready when you can run something like:
 
 .. code-block:: console
 
@@ -81,8 +81,36 @@ That means your container builds and runs locally.
 Automating the app build process
 ================================
 
-LabTest doesn't really care how you generate a Docker image. That said, there is a built-in process that will build your app and Docker image on the laboratory server.
+LabTest doesn't really care how you generate a Docker image. That said, there is a :doc:`built-in process</reference/builtin_build_process>` that will build your app and Docker image on the laboratory server.
+
+At the end of this process, you need a Docker image that is available to the Laboratory server.
 
 
 Configuring for LabTest
 =======================
+
+The LabTest configuration is designed to require little effort, but allow lots of customization. The configuration lives in your repository, possibly in one of your existing configuration files.
+
+Read the section on :doc:`/reference/configuration` for detailed information.
+
+Where to put the configuration?
+-------------------------------
+
+LabTest looks for its configuration information in three places: ``.labtest.yml``\ , ``setup.cfg``\ , and ``package.json``\ . Depending on your setup, pick one.
+
+You can also choose :ref:`reference/configuration:alternate configuration files`.
+
+Required configuration
+----------------------
+
+The :ref:`configuration:host` and :ref:`configuration:test_domain` attributes are required because there is no way that LabTest can derive a good default from the project.
+
+App name
+--------
+
+The "App Name" is LabTest's way to namespace experiments. It is a good idea to set the :ref:`configuration:app_name` attribute. LabTest will default to the name of the directory of the Git project. However, developers have the ability to alter this, which will lead to issues if different developers try to update the same experiment, but LabTest defaults to different app names.
+
+Configuring Backing services
+----------------------------
+
+If your project requires backing services, such as a database, you need to add them to your configuration. You can :doc:`read all about backing services</reference/backing_services/index>`.
