@@ -1,8 +1,8 @@
 {%- extends "alabaster/layout.html" %}
 
-{%- macro sidebar() %}
+{%- macro mysidebar() %}
       {%- if render_sidebar %}
-      <div class="sphinxsidebar foofofof" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation" uk-sticky="offset: 80">
         <div class="sphinxsidebarwrapper">
           {%- block sidebarlogo %}{%- endblock %}
           {%- if sidebars != None %}
@@ -48,15 +48,15 @@
       <div class="uk-container">
         <div class="uk-navbar" uk-navbar>
           <div class="uk-navbar-left">
-            <a href="{{ pathto(master_doc) }}" class="uk-navbar-item uk-logo">
-              <img class="logo" src="{{ pathto('_static/' ~ theme_logo, 1) }}" width="100" alt="Logo"/>
+            <a href="{{ url_root }}index.html" class="uk-navbar-item uk-logo" style="margin-top:6px">
+              <img class="logo" src="{{ pathto('_static/' ~ theme_logo, 1) }}" width="80" height="28" alt="LabTest"/>
             </a>
             {%- block headertitle %}
             {%- endblock %}
             <div class="uk-navbar-item">
               <ul class="uk-breadcrumb uk-margin-remove-bottom">
                 {% if pagename != master_doc %}
-                  <li><a href="{{ pathto(master_doc) }}">{{ shorttitle|e }}</a></li>
+                  <li><a href="{{ url_root }}index.html">{{ shorttitle|e }}</a></li>
                 {% endif %}
                 {%- for parent in parents %}
                     <li><a href="{{ parent.link|e }}">{{ parent.title }}</a></li>
@@ -120,7 +120,7 @@
 
 {# Nav should appear before content, not after #}
 {%- block content %}
-  <div class="uk-container uk-margin-top">
+  <div class="uk-container">
     {%- block document %}
       <div class="uk-grid" uk-grid>
         <div class="body {%- if render_sidebar %} uk-width-3-4@m{%- else %} uk-width-1-1{%- endif %}" role="main">
@@ -129,7 +129,7 @@
         </div>
         {%- block sidebar2 %}
           <div class="uk-width-1-4@m">
-            {{ sidebar() }}
+            {{ mysidebar() }}
           </div>
         {% endblock %}
       </div>

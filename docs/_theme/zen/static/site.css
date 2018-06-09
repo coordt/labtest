@@ -3631,7 +3631,7 @@ ul.uk-nav-sub, .sphinxsidebarwrapper > ul.current > li.current > ul,
   align-items: center;
   /* 2 */
   box-sizing: border-box;
-  height: 80px;
+  height: 40px;
   padding: 0 15px;
   /* 3 */
   font-size: 17px;
