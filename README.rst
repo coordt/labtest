@@ -38,6 +38,8 @@ What can you do with it?
 
 **Parallel development.** One developer can complete three tickets, in three different branches, and publish the three experiments for review by three different people. As the tickets are completed, the branches can be merged and the experiments deleted in any order.
 
+**Tighten feedback loops.** The delay between submitting something from review and receiving the review will slow progress if only one thing can be shown at a time, or the developer and reviewer must both be present. Put up the branch for review via a LabTest experiment, and the reviewer can evaluate at their convenience.
+
 **Quick evaluation of new ideas.** Sometimes you just want to try something. LabTest makes it easy to demonstrate the idea.
 
 **Open evaluation to a greater audience.** When the experiments are accessible from the internet, people don't have to look over the developer's shoulder to see the progress.
