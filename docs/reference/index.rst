@@ -5,6 +5,7 @@ Reference
 .. toctree::
     :maxdepth: 1
 
+    how_it_works
     Seting up your Project <setting_up_your_project>
     Experiment configuration <configuration>
     Backing Services configuration <backing_services/index>
