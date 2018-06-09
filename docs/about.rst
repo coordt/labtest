@@ -12,12 +12,14 @@ LabTest allows you to easily create a semi-public, semi-independent deployment o
 
 In short, LabTest deploys branch ``foo`` onto a server that others can reach at ``foo.test.example.com``\ . This deployment is called an *experiment.*
 
-Put another way, it is a framework to provision temporary isolated infrastructures based on configurations that can be stored in a public code repositories.
+Put another way, it is a framework to provision temporary isolated infrastructures based on configurations that can be stored in a public code repository.
 
 What can you do with it?
 ========================
 
 **Parallel development.** One developer can complete three tickets, in three different branches, and publish the three experiments for review by three different people. As the tickets are completed, the branches can be merged and the experiments deleted in any order.
+
+**Tighten feedback loops.** The delay between submitting something from review and receiving the review will slow progress if only one thing can be shown at a time, or the developer and reviewer must both be present. Put up the branch for review via a LabTest experiment, and the reviewer can evaluate at their convenience.
 
 **Quick evaluation of new ideas.** Sometimes you just want to try something. LabTest makes it easy to demonstrate the idea.
 
@@ -60,6 +62,8 @@ Colophon
 ========
 
 This package was initially created by Corey Oordt for the `City of Boston`_ using Cookiecutter_ and the `lgiordani/cookiecutter-pypackage`_ project template.
+
+Icon: collaborative by Nithinan Tatah from the Noun Project
 
 .. _city of boston: https://www.boston.gov/
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter

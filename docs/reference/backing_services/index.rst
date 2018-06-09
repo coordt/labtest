@@ -35,6 +35,19 @@ On-demand services are specified in the ``services`` section of the experiment c
           provider: docker
           service: mysql
           provision_type: independent
+          options:
+            initial_data_source: /backups/coolapp/
+            image: mysql:5.6
+            wait_for_service: true
+            wait_timeout: 600
+            wait_attempts: 10
+            commands:
+              - "--character-set-server=utf8mb4"
+              - "--collation-server=utf8mb4_unicode_ci"
+            environment:
+              - "MYSQL_ALLOW_EMPTY_PASSWORD=true"
+              - "MYSQL_DATABASE=drupal"
+
 
 In this example ``docker`` will provision an ``independent`` ``mysql`` service named ``mydb``\ .
 

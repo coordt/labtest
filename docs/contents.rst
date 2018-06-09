@@ -9,5 +9,5 @@
    getting_started
    tutorials/index
    admin/index
-   contributing
+   collaborate
    reference/index

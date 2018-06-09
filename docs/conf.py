@@ -86,7 +86,7 @@ release = labtest.__version__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', 'theme']
+exclude_patterns = ['_build', '_theme']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -132,7 +132,7 @@ html_theme_options = {
 html_experimental_html5_writer = True
 html_scaled_image_link = False
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ['theme']
+html_theme_path = ['_theme']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
