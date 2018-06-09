@@ -73,6 +73,17 @@
                 <p>Lots of detailed information about how various parts of LabTest work.</p>
             </div>
         </div>
+        <div>
+            <div class="uk-card uk-card-default uk-card-small uk-card-body">
+                <p class="uk-text-center">
+                    <a href="{{ pathto('collaborate') }}">
+                        <img src="{{ pathto('_static/images/collaborate.svg', 1) }}" width="181" height="152" alt="Collaborate">
+                    </a>
+                </p>
+                <h3 class="uk-card-title"><a href="{{ pathto('collaborate') }}">Collaborate</a></h3>
+                <p>Help us make LabTest better.</p>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock document %}
