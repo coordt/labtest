@@ -2,9 +2,7 @@
 {% set title = _('LabTest') %}
 
 {% block document %}
-<div class="body uk-width-1-1" role="main">
-    <div class="uk-height-medium uk-flex uk-flex-center uk-flex-middle uk-background-cover uk-light uk-margin" data-src="https://placekitten.com/930/400" uk-img>
-    </div>
+<div class="body uk-width-1-1 uk-margin" role="main">
 
     <div class="uk-child-width-1-3@m uk-child-width-1-2@s uk-grid-match uk-margin" uk-grid>
         <div>

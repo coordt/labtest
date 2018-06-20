@@ -324,18 +324,19 @@ def _setup_default_env(instance_name, branch_name=''):
 
 
 @task
-def test_task():
-    _setup_default_env('labtest', 'labtest')
+def test_task(name, command):
+    _setup_default_env(name)
     # _setup_path()
-    print "Starting string to encrypt"
-    pt = 'This is my secret. Keep it safe'
-    print pt
-    ct = env.config.secrets.encrypt(pt)
-    print 'Ciphertext:'
-    print ct
-    new_pt = env.config.secrets.decrypt(ct)
-    print 'Decrypted ciphertext'
-    print new_pt
+    cmd = [
+        'docker run --rm -ti',
+        '--env-file {instance_path}/test.env',
+        '--name {container_name}-cmd',
+        '--network {network_name}',
+        '{docker_image}',
+        command,
+    ]
+
+    run(' '.join(cmd).format(**env), shell=True, quiet=env.quiet)
 
 
 @task
@@ -480,10 +481,13 @@ def list(ctx, app_name):
 
 
 @click.command()
+@click.argument('name')
+@click.argument('command')
 @click.pass_context
-def test(ctx):
+def test(ctx, name, command):
     """
     for testing
     """
     _setup_env_with_config(ctx.obj)
-    execute(test_task, hosts=ctx.obj.host)
+    print name, command
+    execute(test_task, name=name, command=command, hosts=ctx.obj.host)

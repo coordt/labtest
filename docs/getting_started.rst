@@ -99,8 +99,8 @@ If your username contains ``+``\ , ``=``\ , ``,``\ , or ``@`` you need to conver
 
 For this example:
 
-- **SSH bastion IP address:** ``111.222.111.222``
-- **Test server IP address:** ``10.20.3.3``
+- **SSH bastion public IP address:** ``111.222.111.222``
+- **Test server private IP address:** ``10.20.3.3``
 - **User name:** ``corey.oordt.at.boston.gov`` (converted from ``corey.oordt@boston.gov``\ )
 
 Now we add some lines to our ``~/.ssh/config`` file:

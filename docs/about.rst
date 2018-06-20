@@ -65,8 +65,10 @@ This package was initially created by Corey Oordt for the `City of Boston`_ usin
 
 Icon: collaborative by Nithinan Tatah from the Noun Project
 
+Hero Photo by `chuttersnap`_ on `Unsplash`_
+
 .. _city of boston: https://www.boston.gov/
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _lgiordani/cookiecutter-pypackage: https://github.com/lgiordani/cookiecutter-pypackage
-
-
+.. _unsplash: https://unsplash.com/
+.. _chuttersnap: https://unsplash.com/@chuttersnap

@@ -95,6 +95,11 @@ Resources:
       Version: v1
       NoEcho: True
       ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-secret-provider'
+  ElasticIP:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      InstanceId: !Ref TestMachine
+      Domain: vpc
   Logs:
     Type: 'AWS::Logs::LogGroup'
     Properties:
@@ -669,7 +674,7 @@ Resources:
       IamInstanceProfile: !Ref InstanceProfile
       ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', AMI]
       InstanceType: !Ref InstanceType
-      PrivateIpAddress: !Ref PrivateIPAddress
+      PrivateIpAddress: !If [HasPrivateIP, !Ref PrivateIPAddress, !Ref 'AWS::NoValue']
       SecurityGroupIds:
         - !Ref SecurityGroup
         - !Ref ClientSecurityGroup
@@ -704,3 +709,13 @@ Outputs:
   PrivateKeyArn:
     Value: !GetAtt 'PrivateKey.Arn'
     Description: ARN of the private key in the Parameter Store
+  PublicIPAddress:
+    Description: 'The public IP address of the EC2 instance.'
+    Value: !Ref ElasticIP
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicIPAddress'
+  PrivateIPAddress:
+    Description: 'The private IP address of the EC2 instance.'
+    Value: !GetAtt TestMachine.PrivateIp
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateIPAddress'
