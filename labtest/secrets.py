@@ -43,7 +43,9 @@ def encrypt(ctx, plaintext):
     val = plaintext
     if '=' in plaintext:
         key, val = plaintext.split('=')
-        do_parts = click.confirm('Did you want to encrypt "{}" for key "{}"? (No will encrypt the entire string)'.format(val, key))
+        do_parts = click.confirm(
+            f'Did you want to encrypt "{val}" for key "{key}"? (No will encrypt the entire string)'
+        )
         if not do_parts:
             key = ''
             val = plaintext
@@ -53,8 +55,8 @@ def encrypt(ctx, plaintext):
     if key:
         click.echo('Add this to the appropriate environment configuration section:')
         click.echo('')
-        click.echo('{}=ENC[{}]'.format(key, ciphertext))
+        click.echo(f'{key}=ENC[{ciphertext}]')
     else:
         click.echo('Your value is encrypted. Add this appropriate environment configuration section:')
         click.echo('')
-        click.echo('ENC[{}]'.format(ciphertext))
+        click.echo(f'ENC[{ciphertext}]')

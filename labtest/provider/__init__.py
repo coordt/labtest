@@ -31,9 +31,13 @@ def check_services_config(services):
     """
     for service_name, config in iteritems(services):
         if 'provider' not in config:
-            raise click.ClickException('The service "{}" doesn\'t have a provider specified'.format(service_name))
+            raise click.ClickException(
+                f"""The service "{service_name}" doesn\'t have a provider specified"""
+            )
         if 'service' not in config:
-            raise click.ClickException('The service "{}" doesn\'t have a service specified'.format(service_name))
+            raise click.ClickException(
+                f"""The service "{service_name}" doesn\'t have a service specified"""
+            )
         if config['service'] not in service_providers[config['provider']]:
             raise click.ClickException('The {provider} provider doesn\'t have a registered service of "{service}".'.format(**config))
 

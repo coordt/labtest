@@ -80,7 +80,7 @@ class FakeSFTPHandle(paramiko.SFTPHandle):
 class FakeSFTPServer(paramiko.SFTPServerInterface):
     def __init__(self, server, *args, **kwargs):
         self.server = server.server
-        logger.debug('FakeSFTPServer __init__ server: {}'.format(server))
+        logger.debug(f'FakeSFTPServer __init__ server: {server}')
         files = self.server._files
         # Expand such that omitted, implied folders get added explicitly
         for folder in missing_folders(files.keys()):
@@ -91,7 +91,7 @@ class FakeSFTPServer(paramiko.SFTPServerInterface):
         """
         Make non-absolute paths relative to $HOME.
         """
-        logger.debug('Canonicalize: {}'.format(path))
+        logger.debug(f'Canonicalize: {path}')
         return canonicalize(path, self.server._home)
 
     def list_folder(self, path):
@@ -105,8 +105,8 @@ class FakeSFTPServer(paramiko.SFTPServerInterface):
             if cut not in children:
                 children.append(cut)
         results = [self.stat(os.path.join(*x)) for x in children]
-        logger.debug('list_folder: {}'.format(results))
-        bad = not results or any(x == paramiko.SFTP_NO_SUCH_FILE for x in results)
+        logger.debug(f'list_folder: {results}')
+        bad = not results or paramiko.SFTP_NO_SUCH_FILE in results
         return paramiko.SFTP_NO_SUCH_FILE if bad else results
 
     def open(self, path, flags, attr):
@@ -129,7 +129,7 @@ class FakeSFTPServer(paramiko.SFTPServerInterface):
 
     def stat(self, path):
         path = self.files.normalize(path)
-        logger.debug('stat: {}'.format(path))
+        logger.debug(f'stat: {path}')
         try:
             fobj = self.files[path]
         except KeyError:
@@ -148,7 +148,7 @@ class FakeSFTPServer(paramiko.SFTPServerInterface):
         # chmod will call us with an SFTPAttributes object that only exhibits
         # e.g. st_mode, and we don't want to lose our filename or size...
         for which in "size uid gid mode atime mtime".split():
-            attname = "st_" + which
+            attname = f"st_{which}"
             incoming = getattr(attr, attname)
             if incoming is not None:
                 setattr(self.files[path].attributes, attname, incoming)

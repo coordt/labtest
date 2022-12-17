@@ -42,24 +42,22 @@ def create_dir(remote_path, owner=None, group='docker', mode=None):
         group: The name of the group to set the group of the directory
         mode: The mode to set the directory, as a string
     """
-    run('mkdir -p {}'.format(remote_path), quiet=env.quiet)
-    run('chgrp {} {}'.format(group, remote_path), quiet=env.quiet)
+    run(f'mkdir -p {remote_path}', quiet=env.quiet)
+    run(f'chgrp {group} {remote_path}', quiet=env.quiet)
 
     if owner is not None:
-        run('chown {} {}'.format(owner, remote_path), quiet=env.quiet)
+        run(f'chown {owner} {remote_path}', quiet=env.quiet)
 
     if mode is not None:
         if isinstance(mode, int):
             run('chmod {:o} {}'.format(mode, remote_path), quiet=env.quiet)
         else:
-            run('chmod {} {}'.format(mode, remote_path), quiet=env.quiet)
+            run(f'chmod {mode} {remote_path}', quiet=env.quiet)
 
 
 def is_dir(remote_path):
     """
     Check if the remote path is a directory
     """
-    out = run('stat -L --format=%F {}'.format(remote_path), quiet=env.quiet)
-    if out.succeeded and out == 'directory':
-        return True
-    return False
+    out = run(f'stat -L --format=%F {remote_path}', quiet=env.quiet)
+    return bool(out.succeeded and out == 'directory')

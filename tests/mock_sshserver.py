@@ -41,8 +41,7 @@ def _equalize(lists, fillval=None):
     lists = map(list, lists)
     upper = max(len(x) for x in lists)
     for lst in lists:
-        diff = upper - len(lst)
-        if diff:
+        if diff := upper - len(lst):
             lst.extend([fillval] * diff)
     return lists
 
@@ -76,6 +75,7 @@ class Handler(paramiko.ServerInterface):
         try:
             command = self.command_queues[channel.chanid].get(block=True)
             self.log.debug("Executing %s", command)
+            self.log.debug("Executing %s", command)
             if command in self.server._responses:
                 stdout, stderr, returncode = self.response(command)
             else:
@@ -83,7 +83,7 @@ class Handler(paramiko.ServerInterface):
                 stderr = "Sorry, I don't recognize that command.\n"
                 stdout = ''
                 returncode = 1
-            self.log.debug("This is stdout {}".format(stdout))
+            self.log.debug(f"This is stdout {stdout}")
             channel.sendall(stdout)
             channel.sendall_stderr(stderr)
             channel.send_exit_status(returncode)
@@ -97,7 +97,7 @@ class Handler(paramiko.ServerInterface):
         result = self.server._responses[command]
         stderr = ""
         status = 0
-        self.log.debug('response result {} ({})'.format(result, type(result)))
+        self.log.debug(f'response result {result} ({type(result)})')
         if isinstance(result, types.StringTypes):
             stdout = result
         else:
@@ -109,7 +109,7 @@ class Handler(paramiko.ServerInterface):
             elif size == 3:
                 stdout, stderr, status = result
         # stdout, stderr = _equalize((stdout, stderr))
-        self.log.debug('stdout: {}, stderr: {}'.format(stdout, stderr))
+        self.log.debug(f'stdout: {stdout}, stderr: {stderr}')
         return stdout, stderr, status
 
     def check_auth_publickey(self, username, key):
@@ -200,8 +200,8 @@ class Server(object):
             self._socket.shutdown(socket.SHUT_WR)
             self._socket.close()
         except Exception as e:
-            self.log.error('Got an error while exiting: {}'.format(e))
-            # pass
+            self.log.error(f'Got an error while exiting: {e}')
+                # pass
         self._socket = None
         self._thread = None
 

@@ -8,8 +8,8 @@ class KMSSecret(BaseSecret):
     def encrypt(self, plaintext):
         cmd = [
             'aws kms encrypt',
-            '--key-id {}'.format(self.key_id),
-            '--plaintext "{}"'.format(plaintext),
+            f'--key-id {self.key_id}',
+            f'--plaintext "{plaintext}"',
             '--query CiphertextBlob',
             '--output text',
         ]
@@ -18,7 +18,7 @@ class KMSSecret(BaseSecret):
     def decrypt(self, ciphertext):
         cmd = [
             'aws kms decrypt',
-            '--ciphertext-blob fileb://<(echo "{}" | base64 -d)'.format(ciphertext),
+            f'--ciphertext-blob fileb://<(echo "{ciphertext}" | base64 -d)',
             '--output text',
             '--query Plaintext',
             '| base64 -d',

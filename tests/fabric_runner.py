@@ -26,7 +26,7 @@ def setup_config(port=PORT, **kwargs):
         if 'branch_name' in env:
             del env['branch_name']
         instance._setup_default_env('testinstance')
-    env.hosts = ['{}@{}:{}'.format(USER, HOST, port), ]
+    env.hosts = [f'{USER}@{HOST}:{port}']
     env.quiet = False
     env.host_string = env.hosts[0]
     env.key_filename = CLIENT_PRIVKEY

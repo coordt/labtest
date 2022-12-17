@@ -45,10 +45,10 @@ def _remove_path():
     """
     Remove the path o the remote server
     """
-    click.echo('Checking for code path: {}'.format(env.instance_path))
+    click.echo(f'Checking for code path: {env.instance_path}')
     if exists(env.instance_path):
         click.echo('  Found. Removing...')
-        sudo('rm -Rf {}'.format(env.instance_path), quiet=env.quiet)
+        sudo(f'rm -Rf {env.instance_path}', quiet=env.quiet)
 
 
 def _checkout_code():
@@ -135,9 +135,10 @@ def _setup_backing_services():
 
     # De-dupe the additional configs
     keys = set(chain(*[x.keys() for x in additional_configs]))
-    backing_service_configs = {}
-    for key in keys:
-        backing_service_configs[key] = set(chain(*[x.get(key, []) for x in additional_configs]))
+    backing_service_configs = {
+        key: set(chain(*[x.get(key, []) for x in additional_configs]))
+        for key in keys
+    }
     env.backing_service_configs = backing_service_configs
 
 
@@ -188,27 +189,25 @@ def _get_environment():
 
     contents = StringIO()
     env.virtual_host = _virtual_host_name()
-    contents.write(u'VIRTUAL_HOST={}\n'.format(env.virtual_host))
+    contents.write(f'VIRTUAL_HOST={env.virtual_host}\n')
     for key, val in iteritems(env.context):
-        contents.write(u'{}={}\n'.format(key, val))
+        contents.write(f'{key}={val}\n')
     for item in env.environment:
         item = virtualhost_pattern.sub(env.virtual_host, item)
-        match = encrypt_pattern.match(item)
-        if match:
+        if match := encrypt_pattern.match(item):
             contents.write(unicode(match.group(1)))
             contents.write(unicode(env.config.secrets.decrypt(match.group(2))))
             contents.write(unicode(match.group(3)))
         else:
-            contents.write(u'{}\n'.format(item))
+            contents.write(f'{item}\n')
     if 'backing_service_configs' in env:
         for item in env.backing_service_configs.get('environment', []):
-            match = encrypt_pattern.match(item)
-            if match:
+            if match := encrypt_pattern.match(item):
                 contents.write(unicode(match.group(1)))
                 contents.write(unicode(env.config.secrets.decrypt(match.group(2))))
                 contents.write(unicode(match.group(3)))
             else:
-                contents.write(u'{}\n'.format(item))
+                contents.write(f'{item}\n')
     return contents
 
 
@@ -251,9 +250,10 @@ def _update_container():
 
     # Note that the enviornment variables were added in _setup_templates
     if 'backing_service_configs' in env:
-        for host in env.backing_service_configs.get('hosts', []):
-            cmd.append('--add-host {}'.format(host))
-
+        cmd.extend(
+            f'--add-host {host}'
+            for host in env.backing_service_configs.get('hosts', [])
+        )
     cmd.append('{docker_image}')
 
     click.echo('Creating the Docker container.')
@@ -273,7 +273,7 @@ def _before_start_command():
     if not env.before_start_command:
         return
 
-    click.echo('Running the "before start" command: {}'.format(env.before_start_command))
+    click.echo(f'Running the "before start" command: {env.before_start_command}')
 
     cmd = [
         'docker run --rm -ti',
@@ -367,7 +367,10 @@ def create_instance(branch, name=''):
     systemd_template = os.path.join(os.path.dirname(__file__), 'templates', 'systemd-test.conf.template')
     services.setup_service(env.service_name, systemd_template, env.context, env.quiet)
     click.echo('')
-    click.secho('Your experiment is available at: http://{}'.format(env.virtual_host), fg='green')
+    click.secho(
+        f'Your experiment is available at: http://{env.virtual_host}',
+        fg='green',
+    )
 
 
 @task
@@ -419,7 +422,10 @@ def update_instance(name):
     _before_start_command()
     services.start_service('{service_name}'.format(**env), env.quiet)
     click.echo('')
-    click.secho('Your experiment updated and available at: http://{}'.format(env.virtual_host), fg='green')
+    click.secho(
+        f'Your experiment updated and available at: http://{env.virtual_host}',
+        fg='green',
+    )
 
 
 @task
@@ -428,10 +434,10 @@ def list_instances(app_name=''):
     Return a list of test instances on the server
     """
     if app_name:
-        find_cmd = 'find /testing/{}/ -mindepth 1 -maxdepth 1 -type d -print '.format(app_name)
+        find_cmd = f'find /testing/{app_name}/ -mindepth 1 -maxdepth 1 -type d -print '
     else:
         find_cmd = 'find /testing/ -mindepth 2 -maxdepth 2 -type d -print'
-    output = run('{} | sed -e "s;/testing/;;g;s;/;-;g"'.format(find_cmd), quiet=env.quiet)
+    output = run(f'{find_cmd} | sed -e "s;/testing/;;g;s;/;-;g"', quiet=env.quiet)
     click.echo(output)
 
 

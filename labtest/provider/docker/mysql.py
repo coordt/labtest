@@ -25,21 +25,24 @@ def _get_initial_data_source(path):
         click.ClickException
     """
     with settings(warn_only=True):
-        out = run('stat -L --format=%F {}'.format(path), quiet=env.quiet)
-    if out.succeeded:
-        if out == 'regular file':
-            return path
-        elif out == 'directory':
-            with settings(warn_only=True):
-                latest = run('ls -1td {}/* | head -1'.format(path.rstrip('/')), quiet=env.quiet)
-            if latest.succeeded:
-                return latest
-            else:
-                raise click.ClickException('The initial source directory ({}) is empty'.format(path))
+        out = run(f'stat -L --format=%F {path}', quiet=env.quiet)
+    if not out.succeeded:
+        raise click.ClickException(
+            f"""The initial data source "{path}" doesn\'t exist on the test server."""
+        )
+    if out == 'regular file':
+        return path
+    elif out == 'directory':
+        with settings(warn_only=True):
+            latest = run(f"ls -1td {path.rstrip('/')}/* | head -1", quiet=env.quiet)
+        if latest.succeeded:
+            return latest
         else:
-            raise click.ClickException('LabTest doesn\'t understand the type of "{}": {}'.format(path, out))
+            raise click.ClickException(f'The initial source directory ({path}) is empty')
     else:
-        raise click.ClickException('The initial data source "{}" doesn\'t exist on the test server.'.format(path))
+        raise click.ClickException(
+            f"""LabTest doesn\'t understand the type of "{path}": {out}"""
+        )
 
 
 def _setup_initial_data_source(path):
@@ -67,12 +70,12 @@ def _setup_initial_data_source(path):
             return link_path
         else:
             # the initial data source must have changed, so clear it out
-            run('rm -Rf {}/*'.format(init_data_path), quiet=env.quiet)
+            run(f'rm -Rf {init_data_path}/*', quiet=env.quiet)
     else:
-        run('mkdir -p {}'.format(init_data_path), quiet=env.quiet)
-        run('chgrp docker {}'.format(init_data_path), quiet=env.quiet)
-    run('ln -s {} {}'.format(real_path, link_path), quiet=env.quiet)
-    click.echo('  Created a symlink from {} -> {}'.format(real_path, link_path))
+        run(f'mkdir -p {init_data_path}', quiet=env.quiet)
+        run(f'chgrp docker {init_data_path}', quiet=env.quiet)
+    run(f'ln -s {real_path} {link_path}', quiet=env.quiet)
+    click.echo(f'  Created a symlink from {real_path} -> {link_path}')
     return link_path
 
 
@@ -86,7 +89,7 @@ def _setup_env_file(filepath, environment):
     """
     contents = BytesIO()
     for item in environment:
-        contents.write('{}\n'.format(item))
+        contents.write(f'{item}\n')
     with hide('running'):
         put(local_path=contents, remote_path=filepath)
 
@@ -186,7 +189,7 @@ def _delete_config(config_path):
     Remove the JSON file
     """
     if exists(config_path):
-        run('rm {}'.format(config_path), quiet=env.quiet)
+        run(f'rm {config_path}', quiet=env.quiet)
 
 
 def _has_config_changed(new_config):
@@ -195,32 +198,31 @@ def _has_config_changed(new_config):
     ``new_config``
     """
     config_path = new_config['config_path']
-    if exists(config_path):
-        existing_config_buffer = BytesIO()
-        with hide('running'):
-            get(local_path=existing_config_buffer, remote_path=config_path)
-        try:
-            existing_config = json.loads(unicode(existing_config_buffer.getvalue()))
-            key_diffs = set(new_config.keys()) ^ set(existing_config.keys())
-            if len(key_diffs):
-                click.echo('  Configuration for existing MySQL service has different options from the new configuration.')
-                for i in key_diffs:
-                    click.echo('    - {}'.format(i))
+    if not exists(config_path):
+        return True
+    existing_config_buffer = BytesIO()
+    with hide('running'):
+        get(local_path=existing_config_buffer, remote_path=config_path)
+    try:
+        existing_config = json.loads(unicode(existing_config_buffer.getvalue()))
+        key_diffs = set(new_config.keys()) ^ set(existing_config.keys())
+        if len(key_diffs):
+            click.echo('  Configuration for existing MySQL service has different options from the new configuration.')
+            for i in key_diffs:
+                click.echo(f'    - {i}')
+            click.echo('  Re-creating it.')
+            return True
+        for key, val in new_config.items():
+            if existing_config[key] != val:
+                click.echo('  Configuration for existing MySQL service has changed.')
+                click.echo(f'    {key} was {existing_config[key]} now {val}')
                 click.echo('  Re-creating it.')
                 return True
-            for key, val in new_config.items():
-                if existing_config[key] != val:
-                    click.echo('  Configuration for existing MySQL service has changed.')
-                    click.echo('    {} was {} now {}'.format(key, existing_config[key], val))
-                    click.echo('  Re-creating it.')
-                    return True
-            click.echo('  Configuration for existing MySQL service is unchanged. Skipping.')
-            return False
-        except Exception as e:
-            click.echo('  Error: {}'.format(e))
-            click.echo('  Configuration for existing MySQL service is unreadable. Re-creating it.')
-            return True
-    else:
+        click.echo('  Configuration for existing MySQL service is unchanged. Skipping.')
+        return False
+    except Exception as e:
+        click.echo(f'  Error: {e}')
+        click.echo('  Configuration for existing MySQL service is unreadable. Re-creating it.')
         return True
 
 
@@ -290,7 +292,9 @@ def _wait_for_service(config):
     initial_time = time.time()
     end_time = initial_time + wait_time
 
-    click.echo('  Attempt {} of {} ({} seconds to go)'.format(attempts + 1, wait_attempts, wait_time))
+    click.echo(
+        f'  Attempt {attempts + 1} of {wait_attempts} ({wait_time} seconds to go)'
+    )
     while not _is_service_ready(config):
         current_time = time.time()
         if end_time < current_time or attempts == wait_attempts:
@@ -298,16 +302,18 @@ def _wait_for_service(config):
         time_left = int(round(end_time - current_time, 0))
         sleep_time = min([2 ** attempts, time_left])
         if sleep_time == 1:
-            click.echo('  - Waiting for {} second...'.format(sleep_time))
+            click.echo(f'  - Waiting for {sleep_time} second...')
         else:
-            click.echo('  - Waiting for {} seconds...'.format(sleep_time))
+            click.echo(f'  - Waiting for {sleep_time} seconds...')
         time.sleep(sleep_time)
         time_left = int(round(end_time - time.time(), 0))
         attempts += 1
         if attempts == wait_attempts:
             click.echo('  Trying one last time...')
         else:
-            click.echo('  Attempt {} of {} ({} seconds to go)'.format(attempts + 1, wait_attempts, time_left))
+            click.echo(
+                f'  Attempt {attempts + 1} of {wait_attempts} ({time_left} seconds to go)'
+            )
 
     click.secho('  Service is ready', fg='green')
     return True
@@ -330,18 +336,15 @@ def create(config, name):
     if 'initial_data_source' in service_config:
         click.echo('  Getting the initial data source.')
         service_config['initial_data_source'] = _setup_initial_data_source(config['options']['initial_data_source'])
-        click.echo('    Initial data source: {}'.format(service_config['initial_data_source']))
+        click.echo(f"    Initial data source: {service_config['initial_data_source']}")
     if 'image' not in service_config:
         service_config['image'] = 'mysql'
 
-    # See if existing configuration file is on test server
-    # if it is, see if anything changed with current config
-    # Create the service only if the configuration is changed
-    create_service = _has_config_changed(service_config)
-
-    if create_service:
-        click.echo('  Updating docker image "{}" for backing service.'.format(service_config['image']))
-        run('docker pull {}'.format(service_config['image']), quiet=env.quiet)  # To make sure it is ready to go
+    if create_service := _has_config_changed(service_config):
+        click.echo(
+            f"""  Updating docker image "{service_config['image']}" for backing service."""
+        )
+        run(f"docker pull {service_config['image']}", quiet=env.quiet)
         _setup_volume(service_config)
         _setup_container(service_config)
 
@@ -368,9 +371,9 @@ def destroy(config, name):
     click.echo('Destroying MySQL service.')
     initial_data_path = '{instance_path}/initialdata'.format(**env)
     if exists(initial_data_path):
-        run('rm -R {}'.format(initial_data_path), quiet=env.quiet)
+        run(f'rm -R {initial_data_path}', quiet=env.quiet)
     if exists(service_config['environment_file_path']):
-        run('rm -R {}'.format(service_config['environment_file_path']), quiet=env.quiet)
+        run(f"rm -R {service_config['environment_file_path']}", quiet=env.quiet)
 
     _delete_config(service_config['config_path'])
     services.delete_service(service_config['service_name'], env.quiet)

@@ -63,7 +63,7 @@ master_doc = 'contents'
 
 # General information about the project.
 project = u'Lab Test'
-copyright = u"{}, City of Boston".format(datetime.date.today().year)
+copyright = f"{datetime.date.today().year}, City of Boston"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout

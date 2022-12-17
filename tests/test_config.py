@@ -141,7 +141,7 @@ def test_overrides():
 def test_use_ssh_config():
     c = config.get_config(os.path.join(FIXTURE_DIR, 'config.yml'))
     c.use_ssh_config = True
-    assert c.use_ssh_config is True
+    assert c.use_ssh_config
     c.use_ssh_config = 1.5
     assert c.use_ssh_config is False
 
@@ -161,7 +161,10 @@ def test_get_state():
         '/testing/state.json': '{"provider": "local", "service": "script", "options": {"command": "/testing/bin/get-state"}}',
     }
     expected = ''
-    c = config.get_config(os.path.join(FIXTURE_DIR, 'config.yml'), host='username@127.0.0.1:{}'.format(port))
+    c = config.get_config(
+        os.path.join(FIXTURE_DIR, 'config.yml'),
+        host=f'username@127.0.0.1:{port}',
+    )
     response = run_fabric_command(c.get_state, responses, expected, files, env, port=port)
     assert isinstance(response, ScriptState)
 
@@ -180,7 +183,10 @@ def test_get_state_malformed():
         '/testing/state.json': 'asdfasdfasdf',
     }
     expected = ''
-    c = config.get_config(os.path.join(FIXTURE_DIR, 'config.yml'), host='username@127.0.0.1:{}'.format(port))
+    c = config.get_config(
+        os.path.join(FIXTURE_DIR, 'config.yml'),
+        host=f'username@127.0.0.1:{port}',
+    )
 
     with pytest.raises(click.ClickException):
         run_fabric_command(c.get_state, responses, expected, files, env, port=port)
@@ -200,7 +206,10 @@ def test_get_state_no_provider():
         '/testing/state.json': '{"provider": "foo", "service": "script", "options": {"command": "/testing/bin/get-state"}}',
     }
     expected = ''
-    c = config.get_config(os.path.join(FIXTURE_DIR, 'config.yml'), host='username@127.0.0.1:{}'.format(port))
+    c = config.get_config(
+        os.path.join(FIXTURE_DIR, 'config.yml'),
+        host=f'username@127.0.0.1:{port}',
+    )
     with pytest.raises(click.ClickException):
         run_fabric_command(c.get_state, responses, expected, files, env, port=port)
 
@@ -219,7 +228,10 @@ def test_get_state_no_service():
         '/testing/state.json': '{"provider": "local", "service": "foo", "options": {"command": "/testing/bin/get-state"}}',
     }
     expected = ''
-    c = config.get_config(os.path.join(FIXTURE_DIR, 'config.yml'), host='username@127.0.0.1:{}'.format(port))
+    c = config.get_config(
+        os.path.join(FIXTURE_DIR, 'config.yml'),
+        host=f'username@127.0.0.1:{port}',
+    )
     with pytest.raises(click.ClickException):
         run_fabric_command(c.get_state, responses, expected, files, env, port=port)
 
@@ -236,7 +248,10 @@ def test_get_state_none():
     env = {}
     files = {}
     expected = ''
-    c = config.get_config(os.path.join(FIXTURE_DIR, 'config.yml'), host='username@127.0.0.1:{}'.format(port))
+    c = config.get_config(
+        os.path.join(FIXTURE_DIR, 'config.yml'),
+        host=f'username@127.0.0.1:{port}',
+    )
     response = run_fabric_command(c.get_state, responses, expected, files, env, port=port)
     assert response is None
 

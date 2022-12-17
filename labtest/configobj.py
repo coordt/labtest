@@ -49,8 +49,7 @@ class Config(object):
         cfg = {}
         for item in self.required_attrs:
             if item not in self._config:
-                default_func = getattr(self, 'get_default_{}'.format(item), None)
-                if default_func:
+                if default_func := getattr(self, f'get_default_{item}', None):
                     cfg[item] = default_func()
         for key, val in iteritems(self._config):
             cfg[key] = getattr(self, key)
@@ -86,14 +85,20 @@ class Config(object):
         """
         Convenience method to format the validation errors, if any
         """
-        msg = []
-        if self._validation_errors:
-            if 'Missing Attributes' in self._validation_errors:
-                msg.append(click.style('The configuration is missing the following required attributes:', fg='red'))
-                msg.append(', '.join(self._validation_errors['Missing Attributes']))
-            return ' '.join(msg)
-        else:
+        if not self._validation_errors:
             return click.style('The configuration is valid.', fg='green')
+        msg = []
+        if 'Missing Attributes' in self._validation_errors:
+            msg.extend(
+                (
+                    click.style(
+                        'The configuration is missing the following required attributes:',
+                        fg='red',
+                    ),
+                    ', '.join(self._validation_errors['Missing Attributes']),
+                )
+            )
+        return ' '.join(msg)
 
     def __getattr__(self, name):
         """
@@ -110,8 +115,8 @@ class Config(object):
            getting returned.
         4. Raise `AttributeError` if nothing is found
         """
-        attr_name = 'get_{}'.format(name)
-        attr_default_name = 'get_default_{}'.format(name)
+        attr_name = f'get_{name}'
+        attr_default_name = f'get_default_{name}'
         if name.startswith('get_'):
             raise AttributeError
         elif hasattr(self, attr_name):
@@ -121,7 +126,7 @@ class Config(object):
         elif hasattr(self, attr_default_name):
             self._config[name] = getattr(self, attr_default_name)()
             return self._config[name]
-        raise AttributeError('The configuration attribute "{}" is not set.'.format(name))
+        raise AttributeError(f'The configuration attribute "{name}" is not set.')
 
     def __setattr__(self, name, value):
         """
@@ -133,7 +138,7 @@ class Config(object):
            *must* update the attribute in `self._config`
         3. Set the attribute in `_config` to the value passed.
         """
-        attr_name = 'set_{}'.format(name)
+        attr_name = f'set_{name}'
         if name.startswith('_'):
             object.__setattr__(self, name, value)
         elif hasattr(self, attr_name):
@@ -150,8 +155,7 @@ class Config(object):
         from dotenv import find_dotenv
 
         for option in self.default_config_files:
-            path = find_dotenv(option, usecwd=True)
-            if path:
+            if path := find_dotenv(option, usecwd=True):
                 self.config_file_path = os.path.normpath(path)
                 self.parse_file(path)
                 break

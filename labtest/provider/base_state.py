@@ -45,8 +45,7 @@ class BaseState(object):
         paths = [key]
 
         bits = key.strip('/').split('/')
-        for i in range(len(bits), 0, -1):
-            paths.append('/{}/default'.format('/'.join(bits[0:i])))
+        paths.extend(f"/{'/'.join(bits[:i])}/default" for i in range(len(bits), 0, -1))
         paths.append('/default')
         return paths
 

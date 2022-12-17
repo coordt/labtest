@@ -42,7 +42,7 @@ def make_env(self, overrides=None):
     """Returns the environment overrides for invoking a script."""
     rv = {}
     if overrides:
-        rv.update(overrides)
+        rv |= overrides
     return rv
 
 
@@ -101,29 +101,23 @@ def isolation(input=None, env=None, color=False):
     default_color = color
 
     def should_strip_ansi(stream=None, color=None):
-        if color is None:
-            return not default_color
-        return not color
+        return not default_color if color is None else not color
 
     old_env = {}
     try:
         for key, value in iteritems(env):
             old_env[key] = os.environ.get(key)
             if value is None:
-                try:
+                with contextlib.suppress(Exception):
                     del os.environ[key]
-                except Exception:
-                    pass
             else:
                 os.environ[key] = value
         yield bytes_output, bytes_err_output
     finally:
         for key, value in iteritems(old_env):
             if value is None:
-                try:
+                with contextlib.suppress(Exception):
                     del os.environ[key]
-                except Exception:
-                    pass
             else:
                 os.environ[key] = value
         sys.stdout = old_stdout

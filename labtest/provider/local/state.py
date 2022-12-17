@@ -19,8 +19,6 @@ class ScriptState(BaseState):
         Returns:
             The value or ``None``
         """
-        response = run('{} {}'.format(self.command, key))
+        response = run(f'{self.command} {key}')
 
-        if response != '':
-            return response
-        return None
+        return response if response != '' else None

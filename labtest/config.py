@@ -27,12 +27,16 @@ def get_state():
         try:
             state_config = json.loads(get_file_contents(remote_path).getvalue())
         except Exception as e:
-            raise click.ClickException('There was an issue reading the state config: {}'.format(e))
+            raise click.ClickException(f'There was an issue reading the state config: {e}')
 
         if state_config['provider'] not in state_providers:
-            raise click.ClickException('The state provider "{}" is does not exist in this version of LabTest.'.format(state_config['provider']))
+            raise click.ClickException(
+                f"""The state provider "{state_config['provider']}" is does not exist in this version of LabTest."""
+            )
         elif state_config.get('service') not in state_providers[state_config['provider']]:
-            raise click.ClickException('The state provider "{}" is does not have a state service of "{}" in this version of LabTest.'.format(state_config['provider'], state_config['service']))
+            raise click.ClickException(
+                f"""The state provider "{state_config['provider']}" is does not have a state service of "{state_config['service']}" in this version of LabTest."""
+            )
         else:
             return state_providers[state_config['provider']][state_config['service']](state_config.get('options', {}))
     else:
@@ -169,9 +173,13 @@ class LabTestConfig(Config):
             if not isinstance(secret_config, dict):
                 raise click.ClickException('The secret provider configuration is not recognized.')
             elif secret_config.get('provider') not in secret_providers:
-                raise click.ClickException('The secret provider "{}" is not configured in this version of LabTest'.format(secret_config.get('provider')))
+                raise click.ClickException(
+                    f"""The secret provider "{secret_config.get('provider')}" is not configured in this version of LabTest"""
+                )
             elif secret_config.get('service') not in secret_providers[secret_config['provider']]:
-                raise click.ClickException('The secret provider "{}" is does not have a service of "{}" in this version of LabTest.'.format(secret_config['provider'], secret_config.get('service')))
+                raise click.ClickException(
+                    f"""The secret provider "{secret_config['provider']}" is does not have a service of "{secret_config.get('service')}" in this version of LabTest."""
+                )
             else:
                 self._config['secrets'] = secret_providers[secret_config['provider']][secret_config['service']](secret_config.get('options', {}))
 
@@ -206,8 +214,9 @@ class LabTestConfig(Config):
         for option, dependency in iteritems(self.dependencies):
             for dep_option in dependency.get(config[option], []):
                 if dep_option not in config:
-                    default_func = getattr(self, 'get_default_{}'.format(dep_option), None)
-                    if default_func:
+                    if default_func := getattr(
+                        self, f'get_default_{dep_option}', None
+                    ):
                         setattr(self, dep_option, default_func())
                     else:
                         missing_attrs.append(dep_option)
@@ -244,7 +253,7 @@ def _format_config(val, key='', indent=0, indent_amt=2):
     if isinstance(val, (list, tuple)):
         if key:
             click.echo(spaces, nl=False)
-            click.echo(click.style('{}:'.format(key), bold=True))
+            click.echo(click.style(f'{key}:', bold=True))
             indent += 1
         for item in val:
             _format_config(item, '', indent, indent_amt)
@@ -253,18 +262,17 @@ def _format_config(val, key='', indent=0, indent_amt=2):
     elif isinstance(val, dict):
         if key:
             click.echo(spaces, nl=False)
-            click.echo(click.style('{}:'.format(key), bold=True))
+            click.echo(click.style(f'{key}:', bold=True))
             indent += 1
         for subkey, subval in iteritems(val):
             # indent += 1
             _format_config(subval, subkey, indent, indent_amt)
+    elif key:
+        click.echo(spaces, nl=False)
+        click.echo(click.style(f'{key}:', bold=True), nl=False)
+        click.echo(f' {val}')
     else:
-        if key:
-            click.echo(spaces, nl=False)
-            click.echo(click.style('{}:'.format(key), bold=True), nl=False)
-            click.echo(' {}'.format(val))
-        else:
-            click.echo('{}{}'.format(spaces, val))
+        click.echo(f'{spaces}{val}')
 
 
 @click.command()
